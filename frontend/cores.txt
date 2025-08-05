@@ -1,0 +1,5 @@
+--color-azul: #0057D9;
+--color-cinza: #F5F5F5;
+--color-amarelo: #FFB400;
+--color-preto: #1F1F1F;
+--color-verde: #27AE60;
