@@ -5,15 +5,15 @@ const router = express.Router();
 //#endregion
 
 //#region IMPORT DAS CONTROLLES
-const userController = require('../controller/userController');
+const associadoController = require('../controller/associadoController');
 //#endregion
 
 //#region ROTAS DAS REQUISIÇÕES REGISTROS
-router.get('/users', userController.index);
-router.post('/users', userController.store);
-router.get('/users/:id', userController.show);
-router.put('/users/:id', userController.update);
-router.delete('/users/:id', userController.destroy);
+router.get('/associados', associadoController.getAllAssociados);
+router.post('/associados', associadoController.createAssociado);
+router.get('/associados/:id', associadoController.getAssociadoById);
+router.put('/associados/:id', associadoController.updateAssociado);
+router.delete('/associados/:id', associadoController.deleteAssociado);
 //#endregion
 
 
