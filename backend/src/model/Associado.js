@@ -6,9 +6,24 @@ const Associado = {
         defaultValue: DataTypes.UUIDV4, // gera um UUID automático
         primaryKey: true,
     },
+    // Dados Usuário
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
+    senha: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     cpf: {
         type: DataTypes.STRING(14),
-        allowNull: false,
+        allowNull: true,
+        unique: true,
+    },
+    rg: {
+        type: DataTypes.STRING,
+        allowNull: true,
         unique: true,
     },
     nome: {
@@ -23,6 +38,8 @@ const Associado = {
         type: DataTypes.STRING(15),
         allowNull: true,
     },
+
+    //endereço
     rua: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -43,14 +60,15 @@ const Associado = {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    email: {
+
+    //Solicitação faculdade
+    faculdade: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
+        allowNull: true,
     },
-    senha: {
+    curso: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     turno: {
         type: DataTypes.STRING,
@@ -58,11 +76,27 @@ const Associado = {
     },
     situacao: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: "Pendente",
     },
     cidadeTransporte: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    modalidadeTransporte: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
+    //Token de Verificação email
+    confirmationToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    validado: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
     },
 };
 

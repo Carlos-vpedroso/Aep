@@ -1,8 +1,11 @@
-const { AssociadoViewModel } = require('../view/managerView');
-const bcrypt = require('bcryptjs');
+import { AssociadoViewModel } from '../view/managerView.js';
+import bcrypt from 'bcryptjs';
+import { sendVerificationEmail } from '../services/emailService.js';
+import { v4 as uuidv4 } from 'uuid';
+import jwt from 'jsonwebtoken';
 
 // GET: listar todos os associados
-const getAllAssociados = async (req, res) => {
+export const getAllAssociados = async (req, res) => {
     try {
         const associados = await AssociadoViewModel.findAll();
         res.status(200).json(associados);
@@ -12,7 +15,7 @@ const getAllAssociados = async (req, res) => {
 };
 
 // GET: buscar um associado por ID
-const getAssociadoById = async (req, res) => {
+export const getAssociadoById = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -26,25 +29,106 @@ const getAssociadoById = async (req, res) => {
 };
 
 // POST: criar novo associado
-const createAssociado = async (req, res) => {
+export const createAssociado = async (req, res) => {
     try {
         const data = req.body;
 
-        // Hash da senha (opcional, mas recomendado)
-        if (data.senha) {
-            const salt = await bcrypt.genSalt(10);
-            data.senha = await bcrypt.hash(data.senha, salt);
+        // Hash da senha
+        if (!data.senha) {
+            return res.status(400).json({ error: 'Senha é obrigatória' });
         }
+        const salt = await bcrypt.genSalt(10);
+        data.senha = await bcrypt.hash(data.senha, salt);
+
+        // Gerar token de verificação
+        const verificationToken = uuidv4();
+        data.confirmationToken = verificationToken;
 
         const newAssociado = await AssociadoViewModel.create(data);
-        res.status(201).json(newAssociado);
+
+        // Enviar e-mail de confirmação
+        await sendVerificationEmail(data.email, verificationToken);
+
+        res.status(201).json({
+            message: 'Cadastro criado. Verifique seu e-mail para confirmar.',
+            associado: newAssociado
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// PUT: atualizar um associado
-const updateAssociado = async (req, res) => {
+// GET: confirmar e-mail
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        const associado = await AssociadoViewModel.findOne({
+            where: { confirmationToken: token }
+        });
+
+        if (!associado)
+            return res.status(400).json({ error: 'Token inválido ou expirado.' });
+
+        associado.validado = true;
+        associado.confirmationToken = null;
+        await associado.save();
+
+        res.send('Cadastro confirmado com sucesso!');
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+export const loginAssociado = async (req, res) => {
+    try {
+        const { email, senha } = req.body;
+
+        // 1. Verificar se recebeu email e senha
+        if (!email || !senha) {
+            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+        }
+
+        // 2. Buscar associado pelo email
+        const associado = await AssociadoViewModel.findOne({ where: { email } });
+        if (!associado) {
+            return res.status(401).json({ error: 'Email ou senha inválidos' });
+        }
+
+        // 3. Verificar se o e-mail foi validado
+        if (!associado.validado) {
+            return res.status(403).json({ error: 'Confirme seu e-mail antes de fazer login.' });
+        }
+
+        // 4. Comparar a senha informada com a senha armazenada
+        const senhaCorreta = await bcrypt.compare(senha, associado.senha);
+        if (!senhaCorreta) {
+            return res.status(401).json({ error: 'Email ou senha inválidos' });
+        }
+
+        // 5. Gerar token JWT
+        const token = jwt.sign(
+            { id: associado.id, email: associado.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' } // expira em 1 hora
+        );
+
+        // 6. Retornar dados do usuário e token
+        res.status(200).json({
+            message: 'Login realizado com sucesso!',
+            token,
+            id: associado.id,
+            email: associado.email
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// PUT: atualizar associado
+export const updateAssociado = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -67,8 +151,8 @@ const updateAssociado = async (req, res) => {
     }
 };
 
-// DELETE: remover um associado
-const deleteAssociado = async (req, res) => {
+// DELETE: remover associado
+export const deleteAssociado = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -81,12 +165,4 @@ const deleteAssociado = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};
-
-module.exports = {
-    getAllAssociados,
-    getAssociadoById,
-    createAssociado,
-    updateAssociado,
-    deleteAssociado,
 };

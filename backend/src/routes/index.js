@@ -14,6 +14,7 @@ router.post('/associados', associadoController.createAssociado);
 router.get('/associados/:id', associadoController.getAssociadoById);
 router.put('/associados/:id', associadoController.updateAssociado);
 router.delete('/associados/:id', associadoController.deleteAssociado);
+router.get('/associados/verify/:token', associadoController.verifyEmail);
 //#endregion
 
 

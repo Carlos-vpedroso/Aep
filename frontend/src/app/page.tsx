@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 
 export default function Home() {
@@ -23,7 +24,9 @@ export default function Home() {
         <div className="space-y-6 mx-auto">
           <h1 className="font-bold text-3xl">Transporte para <br /> universitários</h1>
           <p className="font-semibold text-xl">Oferecemos transporte para <br />estudantes universitários até<br />suas faculdades.</p>
-          <Button variant="default" className="cursor-pointer bg-verde text-white hover:bg-green-900 transition duration-300">Seja um Associado</Button>
+          <Link href="/associado/cadastro">
+            <Button variant="default" className="cursor-pointer bg-verde text-white hover:bg-green-900 transition duration-300">Seja um Associado</Button>
+          </Link>
         </div>
         <div className="flex items-center justify-center h-full mx-auto">
           <Image
@@ -36,7 +39,7 @@ export default function Home() {
       <section className="bg-white pb-4 w-11/12 mx-auto rounded-sm">
         <h1 className="p-4 text-azul font-bold text-xl">Como Funciona</h1>
         <div className="grid grid-cols-3 gap-4 px-4">
-          <Link href="/" className="mx-auto w-full border-2 border-gray-200 rounded-md hover:shadow-md hover:border-gray-400 transition duration-200">
+          <Link href="/associado/cadastro" className="mx-auto w-full border-2 border-gray-200 rounded-md hover:shadow-md hover:border-gray-400 transition duration-200">
             <div className="flex bg-green-800 w-10 h-10 mx-auto rounded-full items-center justify-center m-2">
               <User className="text-white" />
             </div>
@@ -276,6 +279,7 @@ export default function Home() {
           Somos uma associação sem fins lucrativos criada para garantir transporte acessível e seguro aos estudantes universitários da região. Desde 2020, já ajudamos mais de 300 alunos a chegarem até suas instituições de ensino com conforto e segurança.
         </p>
       </section>
+      <Footer />
     </>
   );
 }
