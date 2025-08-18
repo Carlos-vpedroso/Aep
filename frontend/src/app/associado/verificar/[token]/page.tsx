@@ -34,7 +34,7 @@ export default function VerificarPage() {
                         Parabéns, seu cadastro foi validado com sucesso. Agora você pode acessar a área do associado e aproveitar todos os benefícios.
                     </p>
                     <Link
-                        href="/associado/login"
+                        href="/login"
                         className="inline-block px-6 py-3 bg-azul text-white font-semibold rounded-lg hover:bg-blue-800 transition"
                     >
                         Acessar Área do Associado

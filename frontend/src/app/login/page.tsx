@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import backgroundEstudante_Desktop from "../../../../public/backgroundEstudante_Desktop.png"
-import backgroundEstudante_Mobile from "../../../../public/backgroundEstudante_Mobile.png"
+import backgroundEstudante_Desktop from "../../../public/backgroundEstudante_Desktop.png"
+import backgroundEstudante_Mobile from "../../../public/backgroundEstudante_Mobile.png"
 import Link from "next/link"
 import {
   Form,
@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff } from "lucide-react"
 import Spinner from "@/components/Spinner"
+import { useAuth } from "@/context"
 
 const formSchema = z
   .object({
@@ -32,7 +33,15 @@ type FormValues = z.infer<typeof formSchema>
 
 const perfis = ["Associado", "Diretoria", "Motorista"]
 
+const endpoints: Record<string, string> = {
+  "Associado": "/associados/login",
+  "Diretoria": "/diretoria/login",
+  "Motorista": "/motoristas/login"
+};
+
 export default function LoginPage() {
+
+  const { Login, loading } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,15 +51,9 @@ export default function LoginPage() {
 
   const [perfilSelecionado, setPerfilSelecionado] = useState("Associado")
   const [showSenha, setShowSenha] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = (values: FormValues) => {
-    setIsSubmitting(true)
-
-    setTimeout(() => {
-      console.log("Dados enviados:", values)
-      setIsSubmitting(false)
-    }, 2000)
+    Login(values.email, values.senha, endpoints[perfilSelecionado])
   }
 
   return (
@@ -79,8 +82,9 @@ export default function LoginPage() {
             Login - {perfilSelecionado}
           </CardTitle>
           <p className="text-center text-gray-500 text-sm mt-1">
-            Acesse sua área de associado
+            Acesse sua área de {perfilSelecionado.toLowerCase()}
           </p>
+
         </CardHeader>
         <CardContent>
           {/* Tabs de perfil */}
@@ -114,6 +118,7 @@ export default function LoginPage() {
                         <Input
                           className="mt-1 border-gray-300 focus:border-azul focus:ring-1 focus:ring-azul"
                           placeholder="Ex.: seuemail@email.com"
+                          autoComplete="email"
                           {...field}
                         />
                       </FormControl>
@@ -136,10 +141,11 @@ export default function LoginPage() {
                             className="mt-1 border-gray-300 focus:border-azul focus:ring-1 focus:ring-azul"
                             type={showSenha ? "text" : "password"}
                             placeholder="********"
+                            autoComplete="current-password"
                             {...field}
                           />
                           <Button variant="outline" type="button" onClick={() => setShowSenha(!showSenha)}>
-                            {showSenha ? <Eye className="text-preto"/> : <EyeOff className="text-preto"/>}
+                            {showSenha ? <Eye className="text-preto" /> : <EyeOff className="text-preto" />}
                           </Button>
                         </div>
                       </FormControl>
@@ -151,9 +157,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-roxo transition text-white font-semibold flex justify-center items-center gap-2"
-                disabled={isSubmitting}
+                disabled={loading}
               >
-                {isSubmitting ? <><Spinner size="w-5 h-5" color="border-white" /> Processando...</> : "Entrar"}
+                {loading ? <><Spinner size="w-5 h-5" color="border-white" /> Processando...</> : "Entrar"}
               </Button>
 
             </form>
@@ -161,9 +167,10 @@ export default function LoginPage() {
 
           {/* Links */}
           <div className="flex text-center mt-3 justify-between">
-            <a href="/" className="text-sm text-red-400 hover:text-red-700">
+            <Link href="/" className="text-sm text-red-400 hover:text-red-700">
               Voltar
-            </a>
+            </Link>
+
             <Link href="/" className="text-sm text-azul hover:underline">
               Esqueceu a senha?
             </Link>

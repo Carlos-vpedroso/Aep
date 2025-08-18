@@ -28,6 +28,37 @@ export const getAssociadoById = async (req, res) => {
     }
 };
 
+export const getDadosAssociadoID = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const associado = await AssociadoViewModel.findByPk(id);
+        if (!associado) {
+            return res.status(404).json({ message: 'Associado não encontrado' });
+        }
+        res.status(200).json({
+            email: associado.email,
+            cpf: associado.cpf,
+            rg: associado.rg,
+            nome: associado.nome,
+            telefone: associado.telefone,
+            rua: associado.rua,
+            numero: associado.numero,
+            bairro: associado.bairro,
+            cidade: associado.cidade,
+            cep: associado.cep,
+            faculdade: associado.faculdade,
+            curso: associado.curso,
+            turno: associado.turno,
+            cidadeTransporte: associado.cidadeTransporte,
+            modalidadeTransporte: associado.modalidadeTransporte,
+            situacao: associado.situacao,
+            firstTime: associado.firstTime
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // POST: criar novo associado
 export const createAssociado = async (req, res) => {
     try {
@@ -87,24 +118,26 @@ export const loginAssociado = async (req, res) => {
 
         // 1. Verificar se recebeu email e senha
         if (!email || !senha) {
-            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+            return res.status(400).json({ message: 'Email e senha são obrigatórios' });
         }
 
         // 2. Buscar associado pelo email
         const associado = await AssociadoViewModel.findOne({ where: { email } });
         if (!associado) {
-            return res.status(401).json({ error: 'Email ou senha inválidos' });
+            return res.status(401).json({ message: 'Email ou senha inválidos' });
         }
 
         // 3. Verificar se o e-mail foi validado
         if (!associado.validado) {
-            return res.status(403).json({ error: 'Confirme seu e-mail antes de fazer login.' });
+            return res.status(403).json({
+                message: 'Conta não validada. Verifique seu e-mail para confirmar o cadastro.'
+            });
         }
 
         // 4. Comparar a senha informada com a senha armazenada
         const senhaCorreta = await bcrypt.compare(senha, associado.senha);
         if (!senhaCorreta) {
-            return res.status(401).json({ error: 'Email ou senha inválidos' });
+            return res.status(401).json({ message: 'Email ou senha inválidos' });
         }
 
         // 5. Gerar token JWT

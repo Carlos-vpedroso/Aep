@@ -23,7 +23,7 @@ export default function Navbar() {
   ];
 
   const associadoLinks = [
-    { name: 'Login', href: '/associado/login', icon: <LogIn className="w-4 h-4" /> },
+    { name: 'Login', href: '/login', icon: <LogIn className="w-4 h-4" /> },
     { name: 'Inscrição', href: '/associado/cadastro', icon: <User className="w-4 h-4" /> },
     { name: 'Benefícios', href: '/associado/beneficios' },
   ];

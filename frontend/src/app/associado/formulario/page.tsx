@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form"
 import Spinner from '@/components/Spinner'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '@/context'
 
 // Validação com Zod
 const formSchema = z
@@ -44,7 +45,7 @@ type FormValues = z.infer<typeof formSchema>
 
 const Formulario: NextPage = () => {
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const {loading, setLoading} = useAuth();
     const [showSenha, setShowSenha] = useState(false);
     const [showConfirmSenha, setShowConfirmSenha] = useState(false);
 
@@ -57,7 +58,7 @@ const Formulario: NextPage = () => {
     const isFieldValid = (fieldName: keyof FormValues) => form.getValues(fieldName) && !form.formState.errors[fieldName] && form.formState.isValid;
 
     async function onSubmit(values: FormValues) {
-        setIsSubmitting(true);
+        setLoading(true);
 
         try {
             const body = {
@@ -89,7 +90,7 @@ const Formulario: NextPage = () => {
         } catch (error: any) {
             toast.error(`Erro: ${error.message}`);
         } finally {
-            setIsSubmitting(false);
+            setLoading(false);
         }
     }
 
@@ -196,11 +197,13 @@ const Formulario: NextPage = () => {
                                             <FormLabel>Senha</FormLabel>
                                             <FormControl>
                                                 <div className="flex items-center gap-2">
-                                                    <Input type={showSenha ? "text" : "password"} {...field}
+                                                    <Input 
+                                                        type={showSenha ? "text" : "password"} 
+                                                        {...field}
                                                         placeholder='********'
                                                         className={`${isFieldValid('senha') ? 'border-green-500 focus:border-green-500' : ''}`}
                                                     />
-                                                    <Button type="button" onClick={() => setShowSenha(!showSenha)}>
+                                                    <Button type="button" variant="ghost" onClick={() => setShowSenha(!showSenha)}>
                                                         {showSenha ? <Eye /> : <EyeOff />}
                                                     </Button>
                                                 </div>
@@ -221,11 +224,14 @@ const Formulario: NextPage = () => {
                                                 <FormLabel>Confirme a Senha</FormLabel>
                                                 <FormControl>
                                                     <div className="flex items-center gap-2">
-                                                        <Input type={showConfirmSenha ? "text" : "password"} {...field}
+                                                        <Input 
+                                                            type={showConfirmSenha ? "text" : "password"} 
+                                                            {...field}
+                                                            
                                                             placeholder='********'
                                                             className={`${isFieldValid('confirmSenha') ? 'border-green-500 focus:border-green-500' : ''}`}
                                                         />
-                                                        <Button type="button" onClick={() => setShowConfirmSenha(!showConfirmSenha)}>
+                                                        <Button type="button" variant="ghost" onClick={() => setShowConfirmSenha(!showConfirmSenha)}>
                                                             {showConfirmSenha ? <Eye /> : <EyeOff />}
                                                         </Button>
                                                     </div>
@@ -237,8 +243,8 @@ const Formulario: NextPage = () => {
                                 />
 
                                 <Button type="submit" className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2">
-                                    {isSubmitting && <Spinner />}
-                                    {isSubmitting ? "Processando..." : "Enviar Cadastro"}
+                                    {loading && <Spinner />}
+                                    {loading ? "Processando..." : "Enviar Cadastro"}
                                 </Button>
                             </form>
                         </Form>

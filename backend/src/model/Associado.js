@@ -98,6 +98,13 @@ const Associado = {
         allowNull: false,
         defaultValue: false,
     },
+
+    // Validação para primeiro formulário
+    firstTime: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+    }
 };
 
 module.exports = Associado;
