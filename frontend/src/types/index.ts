@@ -1,14 +1,11 @@
 export interface AuthContextType {
+  userInfo: UserInfo | null;
+  setUserInfo: React.Dispatch<React.SetStateAction<UserInfo | null>>;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   Login: (email: string, senha: string, endpoint: string) => Promise<void>;
   Logout: () => void;
   getInformations: (id: string, token: string) => Promise<UserInfo | null>;
-}
-
-export interface User {
-  id: string;
-  email: string;
 }
 
 export interface UserInfo {

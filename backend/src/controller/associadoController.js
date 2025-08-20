@@ -171,14 +171,11 @@ export const updateAssociado = async (req, res) => {
 
         const data = req.body;
 
-        // Se houver senha, hash novamente
-        if (data.senha) {
-            const salt = await bcrypt.genSalt(10);
-            data.senha = await bcrypt.hash(data.senha, salt);
-        }
-
         await associado.update(data);
-        res.status(200).json(associado);
+        
+        const { senha, ...associadoSemSenha } = associado.get({ plain: true });
+
+        res.status(200).json(associadoSemSenha);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

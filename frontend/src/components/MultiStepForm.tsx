@@ -12,12 +12,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-
+import { useRouter } from "next/navigation";
 import { maskCPF, maskPhone, maskRG } from "@/lib/masks"
 import { toast } from "sonner"
 
+
 interface Props {
-    userInfo: UserInfo
+    userInfo: UserInfo;
+    id: string;
+    functionSet: React.Dispatch<React.SetStateAction<UserInfo | null>>;
 }
 
 const estados = [
@@ -51,14 +54,17 @@ const estados = [
 ];
 
 const faculdades = [
-    { sigla: 'UNIFRAN', nome: "Universidade de Franca", cidade: 'Franca - SP' },
-    { sigla: 'FDF', nome: "Faculdade de Direito de Franca", cidade: 'Franca - SP' },
-    { sigla: 'UEMG', nome: "Universidade Estadual de Minas Gerais", cidade: 'Passos - MG' },
-    { sigla: 'IFSul', nome: "Instituto Federal de Educação, Ciência e Tecnologia do Sul de Minas", cidade: 'Passos - MG' },
-    { sigla: 'Claretiano', nome: "Centro Universitário Claretiano", cidade: 'Batatais - SP' }
+    { sigla: 'UNIFRAN', nome: "Universidade de Franca", cidade: 'Franca' },
+    { sigla: 'FDF', nome: "Faculdade de Direito de Franca", cidade: 'Franca' },
+    { sigla: 'UEMG', nome: "Universidade Estadual de Minas Gerais", cidade: 'Passos' },
+    { sigla: 'IFSul', nome: "Instituto Federal de Educação, Ciência e Tecnologia do Sul de Minas", cidade: 'Passos' },
+    { sigla: 'Claretiano', nome: "Centro Universitário Claretiano", cidade: 'Batatais' }
 ];
 
-export default function MultiStepForm({ userInfo }: Props) {
+export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
+
+    const router = useRouter();
+
     const steps = ["Dados Pessoais", "Endereço", "Faculdade"]
     const [step, setStep] = useState(0)
     const [formData, setFormData] = useState<UserInfo>(userInfo)
@@ -115,6 +121,33 @@ export default function MultiStepForm({ userInfo }: Props) {
         // Busca o endereço apenas quando o CEP estiver completo
         if (novoCep.length === 8) {
             buscarEndereco(novoCep);
+        }
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    firstTime: false,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Erro ao atualizar associado");
+            }
+
+            const data = await response.json();
+            toast.success("Cadastro atualizado com sucesso!");
+            functionSet(data)
+
+        } catch (error) {
+            toast.error("Erro ao salvar alterações");
+            console.error(error);
         }
     };
 
@@ -317,7 +350,10 @@ export default function MultiStepForm({ userInfo }: Props) {
                         Próxima
                     </Button>
                 ) : (
-                    <Button className="bg-green-500 hover:bg-green-600 text-white transition-colors" onClick={() => console.log(formData)}>
+                    <Button
+                        className="bg-green-500 hover:bg-green-600 text-white transition-colors"
+                        onClick={handleSubmit}
+                    >
                         Concluir
                     </Button>
                 )}

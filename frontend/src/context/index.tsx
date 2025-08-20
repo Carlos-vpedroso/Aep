@@ -3,7 +3,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
-import { AuthContextType, User, UserInfo } from "@/types";
+import { AuthContextType, UserInfo } from "@/types";
 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -11,7 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const [loading, setLoading] = useState<boolean>(false)
-    const [user, setUser] = useState<User | null>(null)
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const router = useRouter();
 
     const Login = async (email: string, senha: string, endpoint: string) => {
@@ -80,7 +80,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const Logout = () => {
-        setUser(null);
         Cookies.remove('user');
         Cookies.remove('token');
         router.push('/login');
@@ -88,6 +87,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return <AuthContext.Provider
         value={{
+            userInfo,
+            setUserInfo,
             loading,
             setLoading,
             Login,
