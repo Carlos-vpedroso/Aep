@@ -157,7 +157,7 @@ export default function DashboardSidebar() {
               return (
                 <>
                   {userInfo && (
-                    <TravelDashboard />
+                    <TravelDashboard nome={userInfo.nome} cidadeTransporte={userInfo.cidadeTransporte} id={idUser} turno={userInfo.turno} />
                   )}
                 </>
               )

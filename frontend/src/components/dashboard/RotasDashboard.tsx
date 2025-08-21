@@ -177,36 +177,36 @@ const passosNoturnoLinha2 = {
 // Mapeamento de rotas por cidade e turno
 const rotas: Record<string, Record<string, Linha[]>> = {
     Franca: {
-        NOTURNO: [
+        Noturno: [
             { nome: "Linha Noturno 1", pontos: francaNoturnoLinha1 },
             { nome: "Linha Noturno 2", pontos: francaNoturnoLinha2 },
         ],
-        MATUTINO: [
+        Matutino: [
             { nome: "Linha Matutino", pontos: francaMatutino },
         ],
-        AMBOS: [
+        Ambos: [
             { nome: "Linha Noturno 1", pontos: francaNoturnoLinha1 },
             { nome: "Linha Noturno 2", pontos: francaNoturnoLinha2 },
             { nome: "Linha Matutino", pontos: francaMatutino },
         ],
     },
     Batatais: {
-        NOTURNO: [
+        Noturno: [
             { nome: "Linha Noturno", pontos: batataisNoturno },
         ],
-        AMBOS: [
+        Ambos: [
             { nome: "Linha Noturno", pontos: batataisNoturno },
         ],
     },
     Passos: {
-        MATUTINO: [
+        Matutino: [
             { nome: "Linha Matutino", pontos: passosMatutino },
         ],
-        NOTURNO: [
+        Noturno: [
             { nome: "Linha Noturno 1", pontos: passosNoturnoLinha1 },
             { nome: "Linha Noturno 2", pontos: passosNoturnoLinha2 },
         ],
-        AMBOS: [
+        Ambos: [
             { nome: "Linha Matutino", pontos: passosMatutino },
             { nome: "Linha Noturno 1", pontos: passosNoturnoLinha1 },
             { nome: "Linha Noturno 2", pontos: passosNoturnoLinha2 },

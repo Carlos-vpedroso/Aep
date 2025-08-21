@@ -1,6 +1,8 @@
 const { sequelize } = require('../database');
 const associadoModel = require('../model/Associado');
 const diretoriaModel = require('../model/Diretoria');
+const listaBatataisModel = require('../model/ListaBatatais');
+const listaBatataisAlunosModel = require('../model/ListaBatatais_Alunos');
 const listaFrancaMatutinoAlunosModel = require('../model/ListaFrancaMatutino_Alunos');
 const listaFrancaMatutinoModel = require('../model/ListaFrancaMatutino');
 const listaFrancaNoturnoAlunosModel = require('../model/ListaFrancaNoturno_Alunos');
@@ -19,6 +21,16 @@ const AssociadoViewModel = sequelize.define('Associado', associadoModel, {
 
 const DiretoriaViewModel = sequelize.define('Diretoria', diretoriaModel, {
   tableName: 'diretores',
+  timestamps: true,
+});
+
+const ListaBatataisViewModel = sequelize.define('ListaBatatais', listaBatataisModel, {
+  tableName: 'ListaBatatais',
+  timestamps: true,
+});
+
+const ListaBatataisAlunosViewModel = sequelize.define('ListaAlunosBatatais', listaBatataisAlunosModel, {
+  tableName: 'ListaAlunosBatatais',
   timestamps: true,
 });
 
@@ -93,9 +105,19 @@ ListaPassosNoturnoAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'i
 ListaPassosNoturnoViewModel.hasMany(ListaPassosNoturnoAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
 ListaPassosNoturnoAlunosViewModel.belongsTo(ListaPassosNoturnoViewModel, { foreignKey: 'idLista' });
 
+// Associado ↔ Listas Batatais
+AssociadoViewModel.hasMany(ListaBatataisAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
+ListaBatataisAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
+
+ListaBatataisViewModel.hasMany(ListaBatataisAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
+ListaBatataisAlunosViewModel.belongsTo(ListaBatataisViewModel, { foreignKey: 'idLista' });
+
+
 module.exports = {
   AssociadoViewModel,
   DiretoriaViewModel,
+  ListaBatataisAlunosViewModel,
+  ListaBatataisViewModel,
   ListaFrancaMatutinoAlunosViewModel,
   ListaFrancaMatutinoViewModel,
   ListaFrancaNoturnoAlunosViewModel,

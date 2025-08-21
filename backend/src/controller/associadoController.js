@@ -1,11 +1,11 @@
-import { AssociadoViewModel } from '../view/managerView.js';
-import bcrypt from 'bcryptjs';
-import { sendVerificationEmail } from '../services/emailService.js';
-import { v4 as uuidv4 } from 'uuid';
-import jwt from 'jsonwebtoken';
+const { AssociadoViewModel } = require('../view/managerView.js');
+const bcrypt = require('bcryptjs');
+const { sendVerificationEmail } = require('../services/emailService.js');
+const { v4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 
 // GET: listar todos os associados
-export const getAllAssociados = async (req, res) => {
+const getAllAssociados = async (req, res) => {
     try {
         const associados = await AssociadoViewModel.findAll();
         res.status(200).json(associados);
@@ -15,7 +15,7 @@ export const getAllAssociados = async (req, res) => {
 };
 
 // GET: buscar um associado por ID
-export const getAssociadoById = async (req, res) => {
+const getAssociadoById = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -28,7 +28,7 @@ export const getAssociadoById = async (req, res) => {
     }
 };
 
-export const getDadosAssociadoID = async (req, res) => {
+const getDadosAssociadoID = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -60,7 +60,7 @@ export const getDadosAssociadoID = async (req, res) => {
 };
 
 // POST: criar novo associado
-export const createAssociado = async (req, res) => {
+const createAssociado = async (req, res) => {
     try {
         const data = req.body;
 
@@ -72,7 +72,7 @@ export const createAssociado = async (req, res) => {
         data.senha = await bcrypt.hash(data.senha, salt);
 
         // Gerar token de verificação
-        const verificationToken = uuidv4();
+        const verificationToken = v4();
         data.confirmationToken = verificationToken;
 
         const newAssociado = await AssociadoViewModel.create(data);
@@ -90,7 +90,7 @@ export const createAssociado = async (req, res) => {
 };
 
 // GET: confirmar e-mail
-export const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
 
@@ -112,7 +112,7 @@ export const verifyEmail = async (req, res) => {
 };
 
 
-export const loginAssociado = async (req, res) => {
+const loginAssociado = async (req, res) => {
     try {
         const { email, senha } = req.body;
 
@@ -161,7 +161,7 @@ export const loginAssociado = async (req, res) => {
 };
 
 // PUT: atualizar associado
-export const updateAssociado = async (req, res) => {
+const updateAssociado = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -172,7 +172,7 @@ export const updateAssociado = async (req, res) => {
         const data = req.body;
 
         await associado.update(data);
-        
+
         const { senha, ...associadoSemSenha } = associado.get({ plain: true });
 
         res.status(200).json(associadoSemSenha);
@@ -182,7 +182,7 @@ export const updateAssociado = async (req, res) => {
 };
 
 // DELETE: remover associado
-export const deleteAssociado = async (req, res) => {
+const deleteAssociado = async (req, res) => {
     const { id } = req.params;
     try {
         const associado = await AssociadoViewModel.findByPk(id);
@@ -195,4 +195,15 @@ export const deleteAssociado = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+
+module.exports = {
+    getAllAssociados,
+    getAssociadoById,
+    getDadosAssociadoID,
+    createAssociado,
+    verifyEmail,
+    loginAssociado,
+    updateAssociado,
+    deleteAssociado,
 };

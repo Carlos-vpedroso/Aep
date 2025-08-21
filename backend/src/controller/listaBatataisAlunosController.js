@@ -1,4 +1,4 @@
-const { ListaPassosMatutinoAlunosViewModel, ListaPassosMatutinoViewModel } = require("../view/managerView");
+const { ListaBatataisAlunosViewModel, ListaBatataisViewModel } = require("../view/managerView");
 
 const adicionarAlunoLista = async (req, res) => {
     try {
@@ -6,13 +6,11 @@ const adicionarAlunoLista = async (req, res) => {
         const { nomeAluno, embarque, desembarque } = req.body; // dados opcionais do aluno
 
         // Data de hoje no formato YYYY-MM-DD
-        const hoje = new Date();
-        hoje.setDate(hoje.getDate() + 1); // adiciona 1 dia
-        const dataAmanha = hoje.toISOString().split("T")[0]; // YYYY-MM-DD
+        const hoje = new Date().toISOString().split("T")[0];
 
         // Buscar lista noturna de hoje
-        const lista = await ListaPassosMatutinoViewModel.findOne({
-            where: { data: dataAmanha },
+        const lista = await ListaBatataisViewModel.findOne({
+            where: { data: hoje },
         });
 
         if (!lista) {
@@ -20,7 +18,7 @@ const adicionarAlunoLista = async (req, res) => {
         }
 
         // Criar o vínculo do aluno com a lista
-        const novoAlunoLista = await ListaPassosMatutinoAlunosViewModel.create({
+        const novoAlunoLista = await ListaBatataisAlunosViewModel.create({
             idLista: lista.id,
             idAluno,
             nomeAluno,

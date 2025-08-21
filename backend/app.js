@@ -13,6 +13,9 @@ app.use(cors())
 const routes = require('./src/routes/index');
 app.use("/api", routes);
 
+// Cron Jobs
+require('./src/cronjob/createListasCron') // inicia os cron jobs
+
 // Swagger
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/swagger/swaggerConfig");

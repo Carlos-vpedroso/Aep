@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import ProgressBar from "./ProgressBar"
+import ProgressBar from "@/components/ProgressBar"
 import { UserInfo } from "@/types"
 import {
     Select,
@@ -12,8 +12,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useRouter } from "next/navigation";
 import { maskCPF, maskPhone, maskRG } from "@/lib/masks"
+import { isValidCPF, isValidPhone, isValidRG } from "@/lib/validations"
 import { toast } from "sonner"
 
 
@@ -62,8 +62,6 @@ const faculdades = [
 ];
 
 export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
-
-    const router = useRouter();
 
     const steps = ["Dados Pessoais", "Endereço", "Faculdade"]
     const [step, setStep] = useState(0)
@@ -125,6 +123,47 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     };
 
     const handleSubmit = async () => {
+        // Campos obrigatórios
+        const camposObrigatorios = [
+            "rg",
+            "cpf",
+            "telefone",
+            "cep",
+            "rua",
+            "numero",
+            "bairro",
+            "cidade",
+            "faculdade",
+            "curso",
+            "turno",
+            "modalidadeTransporte"
+        ] as (keyof UserInfo)[];
+
+        const camposNaoPreenchidos = camposObrigatorios.filter(
+            (campo) => !formData[campo] || formData[campo]?.toString().trim() === ""
+        );
+
+        if (camposNaoPreenchidos.length > 0) {
+            toast.error("Por favor, preencha todos os campos obrigatórios.");
+            return;
+        }
+
+        // Validações específicas
+        if (!isValidCPF(formData.cpf || "")) {
+            toast.error("CPF inválido");
+            return;
+        }
+
+        if (!isValidPhone(formData.telefone || "")) {
+            toast.error("Telefone inválido");
+            return;
+        }
+
+        if (!isValidRG(formData.rg || "")) {
+            toast.error("RG inválido");
+            return;
+        }
+
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
                 method: "PUT",
@@ -143,14 +182,13 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
 
             const data = await response.json();
             toast.success("Cadastro atualizado com sucesso!");
-            functionSet(data)
+            functionSet(data);
 
         } catch (error) {
             toast.error("Erro ao salvar alterações");
             console.error(error);
         }
     };
-
 
     return (
         <div className="max-w-lg m-auto p-6 bg-white rounded-xl shadow-lg space-y-6">
@@ -315,9 +353,9 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
                                 <SelectValue placeholder="Selecione seu turno" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="MATUTINO">Matutino</SelectItem>
-                                <SelectItem value="NOTURNO">Noturno</SelectItem>
-                                <SelectItem value="AMBOS">Ambos</SelectItem>
+                                <SelectItem value="Matutino">Matutino</SelectItem>
+                                <SelectItem value="Noturno">Noturno</SelectItem>
+                                <SelectItem value="Ambos">Ambos</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
