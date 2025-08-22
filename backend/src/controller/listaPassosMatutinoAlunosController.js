@@ -2,7 +2,7 @@ const { ListaPassosMatutinoAlunosViewModel, ListaPassosMatutinoViewModel } = req
 
 const adicionarAlunoLista = async (req, res) => {
     try {
-        const { idAluno } = req.params; // ID do aluno vindo pela rota
+        const { id: idAluno } = req.params;
         const { nomeAluno, embarque, desembarque } = req.body; // dados opcionais do aluno
 
         // Data de hoje no formato YYYY-MM-DD
@@ -17,6 +17,15 @@ const adicionarAlunoLista = async (req, res) => {
 
         if (!lista) {
             return res.status(404).json({ message: "Nenhuma lista encontrada para hoje." });
+        }
+
+        // Verificar se o aluno já está na lista
+        const alunoExistente = await ListaPassosMatutinoAlunosViewModel.findOne({
+            where: { idLista: lista.id, idAluno }
+        });
+
+        if (alunoExistente) {
+            return res.status(400).json({ message: "O aluno já está na lista de hoje." });
         }
 
         // Criar o vínculo do aluno com a lista
@@ -38,4 +47,74 @@ const adicionarAlunoLista = async (req, res) => {
     }
 };
 
-module.exports = { adicionarAlunoLista };
+const removerAlunoLista = async (req, res) => {
+    try {
+        const { id: idAluno } = req.params;
+
+        // Data de amanhã no formato YYYY-MM-DD
+        const hoje = new Date();
+        hoje.setDate(hoje.getDate() + 1); // adiciona 1 dia
+        const dataAmanha = hoje.toISOString().split("T")[0]; // YYYY-MM-DD
+
+        // Buscar lista matutina de amanhã
+        const lista = await ListaPassosMatutinoViewModel.findOne({
+            where: { data: dataAmanha },
+        });
+
+        if (!lista) {
+            return res.status(404).json({ message: "Nenhuma lista encontrada para amanhã." });
+        }
+
+        // Verificar se o aluno está na lista
+        const alunoNaLista = await ListaPassosMatutinoAlunosViewModel.findOne({
+            where: { idLista: lista.id, idAluno },
+        });
+
+        if (!alunoNaLista) {
+            return res.status(404).json({ message: "Aluno não encontrado na lista." });
+        }
+
+        // Remover o vínculo do aluno
+        await ListaPassosMatutinoAlunosViewModel.destroy({
+            where: { idLista: lista.id, idAluno },
+        });
+
+        return res.status(200).json({ message: "Aluno removido da lista com sucesso." });
+    } catch (error) {
+        console.error("Erro ao remover aluno da lista:", error);
+        return res.status(500).json({ message: "Erro interno do servidor." });
+    }
+};
+
+const verificarAlunoNaLista = async (req, res, returnData = false) => {
+    try {
+        const { id: idAluno } = req.params;
+        // Data de amanhã no formato YYYY-MM-DD
+        const hoje = new Date();
+        hoje.setDate(hoje.getDate() + 1); // adiciona 1 dia
+        const dataAmanha = hoje.toISOString().split("T")[0]; // YYYY-MM-DD
+
+        const lista = await ListaPassosMatutinoViewModel.findOne({ where: { data: dataAmanha } });
+        if (!lista) return returnData ? null : res.status(404).json({ message: "Nenhuma lista encontrada para hoje." });
+
+        const alunoNaLista = await ListaPassosMatutinoAlunosViewModel.findOne({
+            where: { idLista: lista.id, idAluno },
+        });
+        if (!alunoNaLista) return returnData ? null : res.status(404).json({ message: "Aluno não encontrado na lista." });
+
+        const dadosAluno = {
+            nomeAluno: alunoNaLista.nomeAluno,
+            embarque: alunoNaLista.embarque,
+            desembarque: alunoNaLista.desembarque
+        };
+
+        return returnData ? dadosAluno : res.status(200).json(dadosAluno);
+
+    } catch (error) {
+        console.error("Erro ao verificar aluno na lista:", error);
+        if (!returnData) res.status(500).json({ message: "Erro interno do servidor." });
+        return null;
+    }
+};
+
+module.exports = { adicionarAlunoLista, removerAlunoLista, verificarAlunoNaLista };

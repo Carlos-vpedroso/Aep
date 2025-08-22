@@ -10,6 +10,12 @@ const criarListaMatutino = async () => {
     try {
         const hoje = new Date();
         hoje.setDate(hoje.getDate() + 1); // adiciona 1 dia
+
+        // Se for sábado (6) ou domingo (0), não cria lista
+        if (hoje.getDay() === 6 || hoje.getDay() === 0) {
+            console.log("Final de semana, lista matutina não será criada.");
+            return;
+        }
         const dataAmanha = hoje.toISOString().split("T")[0]; // YYYY-MM-DD
 
         // Verifica se já existe lista em Franca
@@ -46,6 +52,13 @@ const criarListaMatutino = async () => {
 const criarListaNoturno = async () => {
     try {
         const hoje = new Date();
+
+        // Se for sábado (6) ou domingo (0), não cria lista
+        if (hoje.getDay() === 6 || hoje.getDay() === 0) {
+            console.log("Final de semana, lista matutina não será criada.");
+            return;
+        }
+
         const dataHoje = hoje.toISOString().split("T")[0]; // YYYY-MM-DD
 
         // Lista noturna Franca
