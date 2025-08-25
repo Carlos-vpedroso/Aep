@@ -1,11 +1,14 @@
 'use client'
 import { NextPage } from 'next'
 import React, { useState, useEffect } from 'react'
-import { Home, Ticket, Route, FileText, User, Settings, LogOut, X, Menu } from 'lucide-react'
+import { Home, FileText, Settings, LogOut, X, Menu, ListCollapse, Users, Pencil } from 'lucide-react'
 import { useAuth } from '@/context';
 import { Button } from '@/components/ui/button';
+import Cookies from 'js-cookie';
 import Image from 'next/image';
 import logoAep from '../../../../public/LogoAEP-transparente2.png'
+import HomeDiretoria from '@/components/dashboardDiretoria/HomeDiretoria';
+import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types';
 
 interface Props { }
 
@@ -17,19 +20,72 @@ interface Tab {
 }
 
 const DasboardSideBar: NextPage<Props> = ({ }) => {
-    const { Logout } = useAuth();
+    const { Logout, setLoading } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Home');
+    const [quantidadePorCidade, setQuantidadePorCidade] = useState<QuantidadeAssociadosCidade | null>(null)
+    const [quantidadePorModalidade, setQuantidadePorModalidade] = useState<QuantidadeAssociadosModalidade | null>(null)
+    const [quantidadePorSituacao, setQuantidadePorSituacao] = useState<QuantidadeAssociadosSituacao | null>(null)
+
 
     const tabs: Tab[] = [
         { label: "Home", icon: <Home size={20} /> },
-        { label: "Travel", icon: <Ticket size={20} /> },
-        { label: "Rotas", icon: <Route size={20} /> },
+        { label: "Listas", icon: <ListCollapse size={20} /> },
+        { label: "Associados", icon: <Users size={20} /> },
+        { label: "Controle", icon: <Pencil size={20} /> },
         { label: "Pagamentos", icon: <FileText size={20} /> },
-        { label: "Perfil", icon: <User size={20} /> },
         { label: "Configurações", icon: <Settings size={20} /> },
         { label: "Logout", icon: <LogOut size={20} />, isLogout: true, action: Logout },
     ];
+
+    useEffect(() => {
+        const fetchDados = async () => {
+            setLoading(true);
+            try {
+                const token = Cookies.get("token");
+                if (!token) return;
+
+                const headers = {
+                    "Content-Type": "application/json",
+                    ...(token && { "Authorization": `Bearer ${token}` }),
+                };
+
+                // Executa as 3 requisições em paralelo
+                const [resCidades, resModalidade, resSituacao] = await Promise.all([
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/cidade`, { headers }),
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/modalidade`, { headers }),
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/situacao`, { headers }),
+                ]);
+
+                if (!resCidades.ok || !resModalidade.ok || !resSituacao.ok) {
+                    throw new Error("Erro em uma das requisições");
+                }
+
+                // Converte todas as respostas em JSON ao mesmo tempo
+                const [dataCidades, dataModalidade, dataSituacao] = await Promise.all([
+                    resCidades.json(),
+                    resModalidade.json(),
+                    resSituacao.json(),
+                ]);
+
+                // Atualiza os states
+                setQuantidadePorCidade(dataCidades);
+                setQuantidadePorModalidade(dataModalidade);
+                setQuantidadePorSituacao(dataSituacao);
+
+            } catch (error) {
+                console.error("Erro no fetchDados:", error);
+            } finally {
+                // setTimeout(() => {
+                //     setLoading(false)
+                // }, 5000)
+                setLoading(false)
+            }
+        };
+
+        fetchDados();
+    }, [setLoading]);
+
 
     return (
         <div className="flex min-h-screen bg-gray-100">
@@ -73,8 +129,8 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                                 }
                             }}
                             className={`justify-start 
-                ${tab.isLogout ? "bg-red-500 text-white hover:bg-red-600" : ""} 
-                ${activeTab === tab.label && !tab.isLogout ? "bg-azul hover:bg-blue-900" : ""}`}
+                                ${tab.isLogout ? "bg-red-500 text-white hover:bg-red-600" : ""} 
+                                ${activeTab === tab.label && !tab.isLogout ? "bg-azul hover:bg-blue-900" : ""}`}
                         >
                             <div className="flex items-center gap-2">
                                 {tab.icon}
@@ -107,29 +163,35 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                         case "Home":
                             return (
                                 <>
-                                    <p>Visualize seus pagamentos aqui.</p>;
+                                    {quantidadePorCidade && quantidadePorModalidade && quantidadePorSituacao && (
+                                        <HomeDiretoria
+                                            quantidadesCidade={quantidadePorCidade}
+                                            quantidadesModalidade={quantidadePorModalidade}
+                                            quantidadesSituacao={quantidadePorSituacao}
+                                        />
+                                    )}
                                 </>
                             )
-                        case "Travel":
+                        case "Listas":
                             return (
                                 <>
-                                    <p>Visualize seus pagamentos aqui.</p>;
+                                    <p>Visualize suas listas aqui.</p>
                                 </>
                             )
-                        case "Rotas":
+                        case "Associados":
                             return (
                                 <>
-                                    <p>Visualize seus pagamentos aqui.</p>;
+                                    <p>Visualize seus associados aqui.</p>
                                 </>
                             )
+                        case "Controle":
+                            return <p>Gerencie seu perfil.</p>
                         case "Pagamentos":
-                            return <p>Visualize seus pagamentos aqui.</p>;
-                        case "Perfil":
-                            return <p>Gerencie seu perfil.</p>;
+                            return <p>Visualize seus pagamentos aqui.</p>
                         case "Configurações":
-                            return <p>Ajustes e preferências.</p>;
+                            return <p>Ajustes e preferências.</p>
                         default:
-                            return <p>Selecione uma aba.</p>;
+                            return <p>Selecione uma aba.</p>
                     }
                 })()}
             </main>

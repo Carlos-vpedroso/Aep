@@ -14,6 +14,64 @@ const getAllAssociados = async (req, res) => {
     }
 };
 
+// GET: quantidade de associados em todas as cidades
+const getAssociadosQuantidade = async (req, res) => {
+    try {
+        const [franca, passos, batatais] = await Promise.all([
+            AssociadoViewModel.count({ where: { cidadeTransporte: "Franca" } }),
+            AssociadoViewModel.count({ where: { cidadeTransporte: "Passos" } }),
+            AssociadoViewModel.count({ where: { cidadeTransporte: "Batatais" } })
+        ]);
+        const total = franca + passos + batatais;
+
+        res.status(200).json({
+            Franca: franca,
+            Passos: passos,
+            Batatais: batatais,
+            Total: total
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET: quantidade de associados por modalidade
+const getAssociadosPorModalidade = async (req, res) => {
+    try {
+        const [mensal, diaria] = await Promise.all([
+            AssociadoViewModel.count({ where: { modalidadeTransporte: "Mensal" } }),
+            AssociadoViewModel.count({ where: { modalidadeTransporte: "Diaria" } })
+        ]);
+
+        res.status(200).json({
+            Mensal: mensal,
+            Diaria: diaria,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET: quantidade de associados por situação
+const getAssociadosPorSituacao = async (req, res) => {
+    try {
+        const [pendente, ativo, inativo] = await Promise.all([
+            AssociadoViewModel.count({ where: { situacao: "Pendente" } }),
+            AssociadoViewModel.count({ where: { situacao: "Ativo" } }),
+            AssociadoViewModel.count({ where: { situacao: "Inativo" } })
+        ]);
+
+        res.status(200).json({
+            Pendente: pendente,
+            Ativo: ativo,
+            Inativo: inativo
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 // GET: buscar um associado por ID
 const getAssociadoById = async (req, res) => {
     const { id } = req.params;
@@ -206,4 +264,7 @@ module.exports = {
     loginAssociado,
     updateAssociado,
     deleteAssociado,
+    getAssociadosQuantidade,
+    getAssociadosPorModalidade,
+    getAssociadosPorSituacao,
 };

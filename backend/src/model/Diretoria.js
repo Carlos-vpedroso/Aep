@@ -10,7 +10,7 @@ const Diretoria = {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    login: {
+    email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,

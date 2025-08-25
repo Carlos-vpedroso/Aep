@@ -18,8 +18,8 @@ export async function middleware(req: NextRequest) {
     await jose.jwtVerify(token, secret)
 
     // Se quiser, pode acessar o payload do token:
-    const { payload } = await jose.jwtVerify(token, secret)
-    console.log(payload)
+    // const { payload } = await jose.jwtVerify(token, secret)
+    // console.log(payload)
 
     return NextResponse.next()
   } catch (err) {

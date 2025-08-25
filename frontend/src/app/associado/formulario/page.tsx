@@ -19,9 +19,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import { Checkbox } from '@/components/ui/checkbox'
 import Spinner from '@/components/Spinner'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/context'
+import Link from 'next/link'
 
 // Validação com Zod
 const formSchema = z
@@ -31,6 +33,9 @@ const formSchema = z
         confirmEmail: z.string().email("E-mail inválido"),
         senha: z.string().min(8, "A senha deve possuir no mínimo 8 caracteres"),
         confirmSenha: z.string().min(8, "A senha deve possuir no mínimo 8 caracteres"),
+        termos: z.boolean().refine(val => val === true, {
+            message: "Você deve aceitar os termos para continuar"
+        })
     })
     .refine((data) => data.senha === data.confirmSenha, {
         message: "As senhas não conferem",
@@ -45,13 +50,13 @@ type FormValues = z.infer<typeof formSchema>
 
 const Formulario: NextPage = () => {
 
-    const {loading, setLoading} = useAuth();
+    const { loading, setLoading } = useAuth();
     const [showSenha, setShowSenha] = useState(false);
     const [showConfirmSenha, setShowConfirmSenha] = useState(false);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: { nome: "", email: "", confirmEmail: "", senha: "", confirmSenha: "" },
+        defaultValues: { nome: "", email: "", confirmEmail: "", senha: "", confirmSenha: "", termos: false },
         mode: "onChange",
     });
 
@@ -197,8 +202,8 @@ const Formulario: NextPage = () => {
                                             <FormLabel>Senha</FormLabel>
                                             <FormControl>
                                                 <div className="flex items-center gap-2">
-                                                    <Input 
-                                                        type={showSenha ? "text" : "password"} 
+                                                    <Input
+                                                        type={showSenha ? "text" : "password"}
                                                         {...field}
                                                         placeholder='********'
                                                         className={`${isFieldValid('senha') ? 'border-green-500 focus:border-green-500' : ''}`}
@@ -224,10 +229,10 @@ const Formulario: NextPage = () => {
                                                 <FormLabel>Confirme a Senha</FormLabel>
                                                 <FormControl>
                                                     <div className="flex items-center gap-2">
-                                                        <Input 
-                                                            type={showConfirmSenha ? "text" : "password"} 
+                                                        <Input
+                                                            type={showConfirmSenha ? "text" : "password"}
                                                             {...field}
-                                                            
+
                                                             placeholder='********'
                                                             className={`${isFieldValid('confirmSenha') ? 'border-green-500 focus:border-green-500' : ''}`}
                                                         />
@@ -241,8 +246,31 @@ const Formulario: NextPage = () => {
                                         )
                                     }}
                                 />
+                                <FormField
+                                    control={form.control}
+                                    name="termos"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={(value) => field.onChange(!!value)}
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel className="text-sm font-normal">
+                                                    Li e aceito os{" "}
+                                                    <Link href="/termos" className="text-blue-600 hover:underline">
+                                                        Termos de Uso
+                                                    </Link>
+                                                </FormLabel>
+                                                <FormMessage />
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
 
-                                <Button type="submit" className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2">
+                                <Button disabled={loading? true : false} type="submit" className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2">
                                     {loading && <Spinner />}
                                     {loading ? "Processando..." : "Enviar Cadastro"}
                                 </Button>

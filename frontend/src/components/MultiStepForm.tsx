@@ -370,8 +370,8 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
                                 <SelectValue placeholder="Selecione seu turno" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="MENSAL">Mensal</SelectItem>
-                                <SelectItem value="DIARIA">Diária</SelectItem>
+                                <SelectItem value="Mensal">Mensal</SelectItem>
+                                <SelectItem value="Diaria">Diária</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

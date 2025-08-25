@@ -11,6 +11,7 @@ import logoAep from '../../../../public/LogoAEP-transparente2.png'
 import RotasDashboard from '@/components/dashboard/RotasDashboard'
 import HomeDashboard from '@/components/dashboard/HomeDashboard'
 import TravelDashboard from '@/components/dashboard/TravelDashboard'
+import AguardarAprovacao from '@/components/AguardarAprovacao'
 
 interface Tab {
   label: string;
@@ -67,6 +68,14 @@ export default function DashboardSidebar() {
     return (
       <section className="flex w-full min-h-screen">
         <MultiStepForm userInfo={userInfo} id={idUser} functionSet={setUserInfo} />
+      </section>
+    )
+  }
+
+  if (userInfo?.situacao === 'Pendente') {
+    return (
+      <section className="flex w-full min-h-screen">
+        <AguardarAprovacao />
       </section>
     )
   }
@@ -149,7 +158,7 @@ export default function DashboardSidebar() {
               return (
                 <>
                   {userInfo && (
-                    <HomeDashboard usuario={userInfo} />
+                    <HomeDashboard usuario={userInfo} setTab={setActiveTab}/>
                   )}
                 </>
               )

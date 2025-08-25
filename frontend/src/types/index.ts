@@ -28,3 +28,21 @@ export interface UserInfo {
   situacao: string;
   firstTime: boolean;
 }
+
+export interface QuantidadeAssociadosCidade {
+  Franca: number;
+  Passos: number;
+  Batatais: number;
+  Total: number;
+}
+
+export interface QuantidadeAssociadosModalidade {
+  Mensal: number;
+  Diaria: number;
+}
+
+export interface QuantidadeAssociadosSituacao {
+  Ativo: number;
+  Pendente: number;
+  Inativo: number;
+}

@@ -4,15 +4,15 @@ const jwt = require('jsonwebtoken')
 
 const loginDiretoria = async (req, res) => {
     try {
-        const { login, senha } = req.body;
+        const { email, senha } = req.body;
 
         // 1. Verificar se recebeu email e senha
-        if (!login || !senha) {
+        if (!email || !senha) {
             return res.status(400).json({ message: 'Email e senha são obrigatórios' });
         }
 
         // 2. Buscar associado pelo email
-        const diretoria = await DiretoriaViewModel.findOne({ where: { login } });
+        const diretoria = await DiretoriaViewModel.findOne({ where: { email } });
         if (!diretoria) {
             return res.status(401).json({ message: 'Email ou senha inválidos' });
         }
@@ -25,7 +25,7 @@ const loginDiretoria = async (req, res) => {
 
         // 5. Gerar token JWT
         const token = jwt.sign(
-            { id: diretoria.id, login: diretoria.login },
+            { id: diretoria.id, email: diretoria.email },
             process.env.JWT_SECRET,
             { expiresIn: '1h' } // expira em 1 hora
         );
@@ -35,7 +35,7 @@ const loginDiretoria = async (req, res) => {
             message: 'Login realizado com sucesso!',
             token,
             id: diretoria.id,
-            login: diretoria.login
+            email: diretoria.email
         });
 
     } catch (error) {
@@ -45,15 +45,15 @@ const loginDiretoria = async (req, res) => {
 
 const createDiretoria = async (req, res) => {
     try {
-        const { nome, login, senha } = req.body;
+        const { nome, email, senha } = req.body;
 
         // validações básicas
-        if (!nome || !login || !senha) {
+        if (!nome || !email || !senha) {
             return res.status(400).json({ message: "Preencha todos os campos!" });
         }
 
         // verifica se já existe login igual
-        const diretorExistente = await Diretoria.findOne({ where: { login } });
+        const diretorExistente = await DiretoriaViewModel.findOne({ where: { email } });
         if (diretorExistente) {
             return res.status(400).json({ message: "Login já está em uso!" });
         }
@@ -62,9 +62,9 @@ const createDiretoria = async (req, res) => {
         const senhaHash = await bcrypt.hash(senha, 10);
 
         // cria novo registro
-        const novoDiretor = await Diretoria.create({
+        const novoDiretor = await DiretoriaViewModel.create({
             nome,
-            login,
+            email,
             senha: senhaHash,
         });
 
@@ -73,7 +73,7 @@ const createDiretoria = async (req, res) => {
             data: {
                 id: novoDiretor.id,
                 nome: novoDiretor.nome,
-                login: novoDiretor.login,
+                email: novoDiretor.email,
             }
         });
     } catch (error) {

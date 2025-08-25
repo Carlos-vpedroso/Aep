@@ -1,6 +1,19 @@
 import { NextPage } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Bus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { 
+  Clock, 
+  Bus, 
+  MapPin, 
+  ArrowRight, 
+  Route, 
+  Calendar,
+  Timer,
+  Navigation,
+  Users,
+  Info
+} from "lucide-react";
 
 interface Props {
     cidadeTransporte: string | null;
@@ -214,68 +227,261 @@ const rotas: Record<string, Record<string, Linha[]>> = {
     },
 };
 
-
 const RotasOnibus: NextPage<Props> = ({ cidadeTransporte, turno }) => {
+    
+    const getLinhaColor = (nomeLinhaIndex: number) => {
+        const cores = ['#0057D9', '#27AE60', '#7C3AED', '#FFB400'];
+        return cores[nomeLinhaIndex % cores.length];
+    };
+
+    const getTurnoInfo = (nome: string) => {
+        if (nome.includes('Matutino')) {
+            return { 
+              badge: 'Matutino', 
+              color: 'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]',
+              icon: '🌅'
+            };
+        }
+        return { 
+          badge: 'Noturno', 
+          color: 'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]',
+          icon: '🌙'
+        };
+    };
+
+    const calcularTempoViagem = (pontos: PontoIda[]) => {
+        if (pontos.length < 2) return '0 min';
+        const inicio = pontos[0].horario;
+        const fim = pontos[pontos.length - 1].horario;
+        
+        const [horaInicio, minInicio] = inicio.split(':').map(Number);
+        const [horaFim, minFim] = fim.split(':').map(Number);
+        
+        const totalMin = (horaFim * 60 + minFim) - (horaInicio * 60 + minInicio);
+        return `${totalMin} min`;
+    };
+
     const renderLinha = (
         linha: { ida: { horario: string; ponto: string }[]; volta: { centro: boolean; horário: string }[] },
-        titulo: string
-    ) => (
-        <Card className="border border-gray-200 shadow-sm p-2">
-            <CardHeader>
-                <CardTitle className="text-xl font-bold">{titulo}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <h3 className="text-lg font-semibold mb-2">{cidadeTransporte}</h3>
+        titulo: string,
+        index: number
+    ) => {
+        const corLinha = getLinhaColor(index);
+        const turnoInfo = getTurnoInfo(titulo);
+        const tempoViagem = calcularTempoViagem(linha.ida);
 
-                {/* Ida */}
-                <div className="flex flex-col space-y-2">
-                    {linha.ida.map((ponto, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                            {/* Indicador de timeline */}
-                            <div className="flex flex-col items-center mt-1">
-                                <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                                {index !== linha.ida.length - 1 && <div className="w-px h-6 bg-gray-300"></div>}
+        return (
+            <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                {/* Header da linha */}
+                <div 
+                    className="h-2" 
+                    style={{ backgroundColor: corLinha }}
+                />
+                
+                <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div 
+                                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
+                                style={{ backgroundColor: corLinha }}
+                            >
+                                <Route className="w-6 h-6" />
                             </div>
-
-                            {/* Conteúdo do ponto */}
-                            <div className="flex flex-col text-sm">
-                                <span className="flex items-center gap-1 font-semibold text-blue-600">
-                                    <Clock size={14} /> {ponto.horario}
-                                </span>
-                                <span className="flex items-center gap-1 text-gray-800">
-                                    <Bus size={14} /> {ponto.ponto}
-                                </span>
+                            <div>
+                                <CardTitle className="text-[#1F1F1F] text-lg">{titulo}</CardTitle>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <MapPin className="w-4 h-4 text-gray-500" />
+                                    <span className="text-gray-600 text-sm">{cidadeTransporte}</span>
+                                </div>
                             </div>
                         </div>
-                    ))}
-                </div>
-
-                {/* Volta */}
-                <div className="mt-4 p-2 bg-blue-50 rounded-md border border-blue-200">
-                    <h4 className="text-blue-800 font-semibold mb-2">Horário de Volta</h4>
-                    <div className="flex flex-col gap-1">
-                        {linha.volta.map((v, idx) => (
-                            <span key={idx} className="text-blue-700 font-medium text-lg">
-                                {v.centro ? "Retorno do Centro" : "Retorno normal"} - {v.horário}
-                            </span>
-                        ))}
+                        <Badge variant="outline" className={turnoInfo.color}>
+                            {turnoInfo.icon} {turnoInfo.badge}
+                        </Badge>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
+                </CardHeader>
 
+                <CardContent className="space-y-6">
+                    {/* Informações da rota */}
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                            <Users className="w-5 h-5 text-[#0057D9] mx-auto mb-1" />
+                            <p className="text-xs text-gray-600">Paradas</p>
+                            <p className="font-semibold text-[#1F1F1F]">{linha.ida.length}</p>
+                        </div>
+                        <div className="text-center">
+                            <Timer className="w-5 h-5 text-[#27AE60] mx-auto mb-1" />
+                            <p className="text-xs text-gray-600">Duração</p>
+                            <p className="font-semibold text-[#1F1F1F]">{tempoViagem}</p>
+                        </div>
+                        <div className="text-center">
+                            <Navigation className="w-5 h-5 text-[#FFB400] mx-auto mb-1" />
+                            <p className="text-xs text-gray-600">Saída</p>
+                            <p className="font-semibold text-[#1F1F1F]">{linha.ida[0]?.horario}</p>
+                        </div>
+                    </div>
+
+                    {/* Timeline da ida */}
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <ArrowRight className="w-5 h-5 text-[#27AE60]" />
+                            <h4 className="font-semibold text-[#1F1F1F]">Rota de Ida</h4>
+                        </div>
+                        
+                        <div className="max-h-64 overflow-y-auto pr-2 space-y-3">
+                            {linha.ida.map((ponto, index) => (
+                                <div key={index} className="flex items-start gap-3">
+                                    {/* Timeline indicator */}
+                                    <div className="flex flex-col items-center pt-1">
+                                        <div 
+                                            className={`w-4 h-4 rounded-full border-2 border-white shadow-md ${
+                                                index === 0 ? 'bg-[#27AE60]' : 
+                                                index === linha.ida.length - 1 ? 'bg-[#FFB400]' : 
+                                                'bg-[#0057D9]'
+                                            }`}
+                                        />
+                                        {index !== linha.ida.length - 1 && (
+                                            <div className="w-px h-8 bg-gray-300 mt-1" />
+                                        )}
+                                    </div>
+
+                                    {/* Conteúdo do ponto */}
+                                    <div className="flex-1 pb-2">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="font-medium text-[#1F1F1F] text-sm">
+                                                    {ponto.ponto}
+                                                </p>
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <Clock className="w-3 h-3" style={{ color: corLinha }} />
+                                                    <span className="text-xs font-medium" style={{ color: corLinha }}>
+                                                        {ponto.horario}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {(index === 0 || index === linha.ida.length - 1) && (
+                                                <Badge 
+                                                    variant="secondary" 
+                                                    className={`text-xs ${
+                                                        index === 0 ? 
+                                                        'bg-[#27AE60]/10 text-[#27AE60]' : 
+                                                        'bg-[#FFB400]/10 text-[#FFB400]'
+                                                    }`}
+                                                >
+                                                    {index === 0 ? 'Início' : 'Destino'}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Horários de retorno */}
+                    <div className="border-t pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <ArrowRight className="w-5 h-5 text-[#7C3AED] rotate-180" />
+                            <h4 className="font-semibold text-[#1F1F1F]">Horários de Retorno</h4>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            {linha.volta.map((volta, idx) => (
+                                <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between p-3 bg-gradient-to-r from-[#7C3AED]/5 to-[#7C3AED]/10 rounded-lg border border-[#7C3AED]/20"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-3 h-3 bg-[#7C3AED] rounded-full" />
+                                        <span className="font-medium text-[#1F1F1F]">
+                                            {volta.centro ? "Retorno do Centro" : "Retorno Normal"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-[#7C3AED]" />
+                                        <span className="font-bold text-[#7C3AED]">{volta.horário}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    };
+
+    const linhasDisponiveis = cidadeTransporte && turno ? rotas[cidadeTransporte]?.[turno] || [] : [];
 
     return (
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 overflow-x-auto">
-            {cidadeTransporte && turno && rotas[cidadeTransporte]?.[turno]?.map((linha, idx) => (
-                <div key={`${linha.nome}-${idx}`}>
-                    {renderLinha(linha.pontos, linha.nome)}
+        <div className="min-h-screen bg-[#F5F5F5] p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+                
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[#1F1F1F] flex items-center gap-3">
+                            <Bus className="w-8 h-8 text-[#0057D9]" />
+                            Rotas de Transporte
+                        </h1>
+                        <p className="text-gray-600 mt-1">
+                            Horários e paradas para {cidadeTransporte} - {turno}
+                        </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                        <Badge className="bg-[#0057D9]/10 text-[#0057D9] border-[#0057D9]">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {linhasDisponiveis.length} {linhasDisponiveis.length === 1 ? 'linha' : 'linhas'}
+                        </Badge>
+                        <Button variant="outline" className="border-[#27AE60] text-[#27AE60] hover:bg-[#27AE60]/10">
+                            <Info className="w-4 h-4 mr-2" />
+                            Informações
+                        </Button>
+                    </div>
                 </div>
-            ))}
-        </section>
 
+                {/* Grid de rotas */}
+                {linhasDisponiveis.length > 0 ? (
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        {linhasDisponiveis.map((linha, idx) => (
+                            <div key={`${linha.nome}-${idx}`}>
+                                {renderLinha(linha.pontos, linha.nome, idx)}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <Card className="border-none shadow-md">
+                        <CardContent className="p-12 text-center">
+                            <Bus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-[#1F1F1F] mb-2">
+                                Nenhuma rota encontrada
+                            </h3>
+                            <p className="text-gray-600">
+                                Não há rotas disponíveis para {cidadeTransporte} no turno {turno}.
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
 
+                {/* Card de informações importantes */}
+                <Card className="border-none shadow-md border-l-4 border-l-[#FFB400]">
+                    <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                            <Info className="w-6 h-6 text-[#FFB400] mt-1" />
+                            <div>
+                                <h3 className="font-semibold text-[#1F1F1F] mb-2">Informações Importantes</h3>
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <p>• Os horários podem sofrer alterações conforme as condições de trânsito</p>
+                                    <p>• É necessário ter a passagem gerada para embarcar</p>
+                                    <p>• Chegue ao ponto com pelo menos 5 minutos de antecedência</p>
+                                    <p>• Em caso de dúvidas, entre em contato conosco</p>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
 };
 

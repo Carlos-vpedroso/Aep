@@ -8,6 +8,7 @@ const authenticateToken = require('../middlewares/authMiddleware')
 //#region IMPORT DAS CONTROLLES
 const associadoController = require('../controller/associadoController');
 const controllerAlunosLista = require('../controller/listaCidadeTurnoAlunoController')
+const diretoriaController = require('../controller/diretoriaController')
 // const listaBatataisAlunosController = require('../controller/listaBatataisAlunosController');
 // const listaFrancaMatutinoAlunosController = require('../controller/listaFrancaMatutinoAlunosController');
 // const listaFrancaNoturnoAlunosController = require('../controller/listaFrancaNoturnoAlunosController');
@@ -17,6 +18,9 @@ const controllerAlunosLista = require('../controller/listaCidadeTurnoAlunoContro
 
 //#region ROTAS DAS REQUISIÇÕES ASSOCIADO
 router.get('/associados', associadoController.getAllAssociados);
+router.get('/associados/quantidade/cidade', authenticateToken, associadoController.getAssociadosQuantidade);
+router.get('/associados/quantidade/modalidade', authenticateToken, associadoController.getAssociadosPorModalidade);
+router.get('/associados/quantidade/situacao', authenticateToken, associadoController.getAssociadosPorSituacao);
 router.get('/fullacess/associados/:id', authenticateToken, associadoController.getAssociadoById);
 router.get('/associados/:id', authenticateToken, associadoController.getDadosAssociadoID);
 router.get('/associados/verify/:token', associadoController.verifyEmail);
@@ -35,6 +39,11 @@ router.delete('/associados/:cidade/:turno/:id', authenticateToken, controllerAlu
 
 // Verificar se aluno está na lista
 router.get('/associados/:cidade/:turno/:id', authenticateToken, controllerAlunosLista.verificarAlunoNaLista);
+//#endregion
+
+//#region ROTAS DIRETORIA
+router.post('/diretoria/login', diretoriaController.loginDiretoria);
+router.post('/diretoria', diretoriaController.createDiretoria);
 //#endregion
 
 
