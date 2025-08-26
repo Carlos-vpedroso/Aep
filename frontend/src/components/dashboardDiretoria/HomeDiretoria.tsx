@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import {
   Users,
+  User,
   TrendingUp,
   DollarSign,
   Activity,
@@ -22,23 +23,21 @@ import Autoplay from "embla-carousel-autoplay"
 import Spinner from '../Spinner'
 
 interface Props {
-  quantidadesCidade: QuantidadeAssociadosCidade;
   quantidadesModalidade: QuantidadeAssociadosModalidade;
   quantidadesSituacao: QuantidadeAssociadosSituacao;
 }
 
-const HomeDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesModalidade, quantidadesSituacao }: Props) => {
+const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSituacao }: Props) => {
   const { loading } = useAuth();
   const totalAssociadosCadastrados = quantidadesSituacao.Ativo + quantidadesSituacao.Inativo + quantidadesSituacao.Pendente
   const valorMensalidade = 450
-  const valorTotalArrecadado = quantidadesModalidade.Mensal * valorMensalidade;
+  const valorTotalArrecadado = (quantidadesModalidade.Mensal - (quantidadesSituacao.Pendente + quantidadesSituacao.Inativo)) * valorMensalidade;
   const valorFormatado = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(valorTotalArrecadado);
 
 
-  // Dados mockados para demonstração
   const kpiData = [
     {
       title: "Receita Total - Mensalistas",
@@ -55,7 +54,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesModalida
     {
       title: "Diaristas",
       value: quantidadesModalidade.Diaria,
-      icon: Target,
+      icon: User,
       color: "text-[#FFB400]"
     },
     {
@@ -104,7 +103,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesModalida
 
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -134,7 +133,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesModalida
                 <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow p-4 select-none">
                   <CardContent className="p-0 flex items-center gap-4">
                     {/* Ícone à esquerda */}
-                    <div className="p-2 rounded-lg bg-gray-50 flex-shrink-0">
+                    <div className="p-2 rounded-lg bg-gray-100 flex-shrink-0">
                       <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
                     </div>
                     {/* Carousel à direita */}
@@ -173,7 +172,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesModalida
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg bg-gray-50`}>
+                      <div className={`p-2 rounded-lg bg-gray-100`}>
                         <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
                       </div>
                       <div>

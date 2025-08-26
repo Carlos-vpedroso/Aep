@@ -7,12 +7,18 @@ const jwt = require('jsonwebtoken');
 // GET: listar todos os associados
 const getAllAssociados = async (req, res) => {
     try {
-        const associados = await AssociadoViewModel.findAll();
-        res.status(200).json(associados);
+        const associados = await AssociadoViewModel.findAll({ raw: true });
+
+        // Remove a senha de cada associado
+        const associadosSemSenha = associados.map(({ senha, ...dados }) => dados);
+
+        res.status(200).json(associadosSemSenha);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 // GET: quantidade de associados em todas as cidades
 const getAssociadosQuantidade = async (req, res) => {

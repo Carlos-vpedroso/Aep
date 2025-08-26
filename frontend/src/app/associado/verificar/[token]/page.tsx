@@ -10,7 +10,7 @@ export default function VerificarPage() {
     const [status, setStatus] = useState("Validando...");
 
     useEffect(() => {
-        fetch(`http://localhost:5556/api/associados/verify/${token}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/verify/${token}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.error) {

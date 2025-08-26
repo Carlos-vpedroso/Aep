@@ -9,6 +9,8 @@ import Image from 'next/image';
 import logoAep from '../../../../public/LogoAEP-transparente2.png'
 import HomeDiretoria from '@/components/dashboardDiretoria/HomeDiretoria';
 import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types';
+import ListasDiretoria from '@/components/dashboardDiretoria/ListasDiretoria';
+import AssociadosDiretoria from '@/components/dashboardDiretoria/AssociadosDiretoria'
 
 interface Props { }
 
@@ -32,7 +34,6 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
         { label: "Home", icon: <Home size={20} /> },
         { label: "Listas", icon: <ListCollapse size={20} /> },
         { label: "Associados", icon: <Users size={20} /> },
-        { label: "Controle", icon: <Pencil size={20} /> },
         { label: "Pagamentos", icon: <FileText size={20} /> },
         { label: "Configurações", icon: <Settings size={20} /> },
         { label: "Logout", icon: <LogOut size={20} />, isLogout: true, action: Logout },
@@ -156,16 +157,15 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                     </Button>
                 </div>
 
-                <h1 className="text-2xl font-bold mb-4">{activeTab}</h1>
+    
                 {/* Conteúdo dinâmico baseado na tab ativa */}
                 {(() => {
                     switch (activeTab) {
                         case "Home":
                             return (
                                 <>
-                                    {quantidadePorCidade && quantidadePorModalidade && quantidadePorSituacao && (
+                                    { quantidadePorModalidade && quantidadePorSituacao && (
                                         <HomeDiretoria
-                                            quantidadesCidade={quantidadePorCidade}
                                             quantidadesModalidade={quantidadePorModalidade}
                                             quantidadesSituacao={quantidadePorSituacao}
                                         />
@@ -175,17 +175,21 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                         case "Listas":
                             return (
                                 <>
-                                    <p>Visualize suas listas aqui.</p>
+                                    <ListasDiretoria/>
                                 </>
                             )
                         case "Associados":
                             return (
                                 <>
-                                    <p>Visualize seus associados aqui.</p>
+                                    { quantidadePorCidade && quantidadePorModalidade && quantidadePorSituacao && (
+                                        <AssociadosDiretoria
+                                            quantidadesModalidade={quantidadePorModalidade}
+                                            quantidadesSituacao={quantidadePorSituacao}
+                                            quantidadesCidade={quantidadePorCidade}
+                                        />
+                                    )}
                                 </>
                             )
-                        case "Controle":
-                            return <p>Gerencie seu perfil.</p>
                         case "Pagamentos":
                             return <p>Visualize seus pagamentos aqui.</p>
                         case "Configurações":

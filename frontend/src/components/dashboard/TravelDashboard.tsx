@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { NextPage } from 'next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +14,20 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import Cookies from 'js-cookie';
-import { BusFront, Trash2 } from 'lucide-react';
+import { 
+    BusFront, 
+    Trash2, 
+    MapPin, 
+    Clock, 
+    Calendar, 
+    User, 
+    Route, 
+    AlertTriangle,
+    CheckCircle2,
+    ArrowRight,
+    Navigation,
+    Ticket
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -79,7 +93,6 @@ const passagemSchema = z.object({
     pontoVolta: z.string().optional()
 })
 
-
 // ======== COMPONENTE RenderSelect ==========
 interface RenderSelectProps {
     lista: string[];
@@ -90,7 +103,7 @@ interface RenderSelectProps {
 
 const RenderSelect = ({ lista, value, onChange, placeholder }: RenderSelectProps) => (
     <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+        <SelectTrigger className="w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0057D9]">
             <SelectValue placeholder={placeholder || "Selecione"} />
         </SelectTrigger>
         <SelectContent>
@@ -118,7 +131,6 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
         }
     });
 
-
     // Validação do pontoVolta
     const pontoVoltaValue = watch("pontoVolta");
 
@@ -126,7 +138,6 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
         if (pontoVoltaValue) {
             clearErrors("pontoVolta");
         }
-
     }, [pontoVoltaValue, clearErrors]);
 
     // Busca passagens já existentes
@@ -148,7 +159,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                 );
                 if (res.ok) {
                     const data = await res.json();
-                    setPassagens(Array.isArray(data) ? data : [data]); // garante que vira array
+                    setPassagens(Array.isArray(data) ? data : [data]);
                 }
             } catch (error) {
                 console.error("Erro ao buscar passagens", error);
@@ -159,7 +170,6 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
 
         fetchPassagens();
     }, [cidadeTransporte, turno, id, setLoading]);
-
 
     useEffect(() => {
         if (turno && turno !== 'Ambos') {
@@ -172,14 +182,12 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
     }, [cidadeTransporte, newTurno, setValue, turno]);
 
     const onSubmit = async (formData: any) => {
-        // monta os dados finais
         const payload = {
             nomeAluno: nome,
             embarque: formData.pontoIda,
             desembarque: samePoint ? formData.pontoIda : formData.pontoVolta
         };
 
-        // validação extra quando "mesmo ponto" não está marcado
         if (!samePoint && !formData.pontoVolta) {
             setError("pontoVolta", {
                 type: "manual",
@@ -216,7 +224,6 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
 
             setPassagens(prev => [...prev, { ...payload, turno: newTurno, cidadeTransporte }]);
             toast.success("Passagem gerada com sucesso!");
-            console.log("Passagem gerada:", payload);
 
         } catch (error) {
             console.error(error);
@@ -239,129 +246,257 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             if (!res.ok) { toast.error("Erro ao cancelar"); return; }
             toast.success("Passagem cancelada");
             setPassagens(prev => prev.filter(p => p.turno !== passagemTurno));
-        } catch (err) { console.error(err); toast.error("Erro de conexão"); }
-        finally { setLoading(false); }
+        } catch (err) { 
+            console.error(err); 
+            toast.error("Erro de conexão"); 
+        } finally { 
+            setLoading(false); 
+        }
     };
 
     const getAmanha = () => {
         const hoje = new Date();
         const amanha = new Date(hoje);
-        amanha.setDate(hoje.getDate() + 1); // adiciona 1 dia
+        amanha.setDate(hoje.getDate() + 1);
 
-        // Formata como DD/MM/YYYY
         const dia = String(amanha.getDate()).padStart(2, '0');
-        const mes = String(amanha.getMonth() + 1).padStart(2, '0'); // meses começam do 0
+        const mes = String(amanha.getMonth() + 1).padStart(2, '0');
         const ano = amanha.getFullYear();
 
         return `${dia}/${mes}/${ano}`;
     }
+    
     const getHoje = () => {
         const hoje = new Date();
-        // Formata como DD/MM/YYYY
         const dia = String(hoje.getDate()).padStart(2, '0');
-        const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // meses começam do 0
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
         const ano = hoje.getFullYear();
 
         return `${dia}/${mes}/${ano}`;
     }
 
-    // ======== Lógica para turno Ambos ==========
+    const getBadgeColor = (turno: string) => {
+        return turno === 'Matutino' ? 
+            'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]' : 
+            'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]';
+    };
+
+    // Lógica para turno Ambos
     const turnosDisponiveis = turno === "Ambos" ? ["Matutino", "Noturno"] : [turno!];
     const turnosUsados = passagens.map(p => p.turno);
     const turnosFaltando = turnosDisponiveis.filter(t => !turnosUsados.includes(t));
 
     return (
-        <section className="space-y-4">
-            <h1>Nessa página você conseguirá gerar sua passagem para o embarque e utilização do transporte</h1>
-
-            {/* Passagens existentes */}
-            {passagens.length > 0 && (
-                <div className='grid grid-cols-1 gap-4'>
-                    {passagens.map((p, index) => (
-                        <Card key={index} className="border border-gray-200 shadow-sm">
-                            <CardHeader>
-                                <CardTitle className='flex items-center gap-4'>
-                                    <BusFront className="text-azul" />
-                                    <h1>Minha Passagem - {p.turno}</h1>
-                                </CardTitle>
-                                <CardDescription>
-                                    Para o dia: <span className='font-semibold'>{p.turno === 'Matutino'? getAmanha() : getHoje()}</span>
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                <p><b>Passageiro:</b> {p.nomeAluno}</p>
-                                <p><b>Cidade:</b> {p.cidadeTransporte}</p>
-                                <p><b>Turno:</b> {p.turno}</p>
-                                <p><b>Embarque:</b> {p.embarque}</p>
-                                <p><b>Desembarque:</b> {p.desembarque}</p>
-                                <Button
-                                    variant="destructive"
-                                    onClick={() => cancelarPassagem(p.turno)}
-                                    className="flex gap-2 mt-4"
-                                    disabled={loading}
-                                >
-                                    <Trash2 /> {loading ? "Cancelando..." : "Cancelar Passagem"}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    ))}
+        <div className="min-h-screen bg-[#F5F5F5] p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+                
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[#1F1F1F] flex items-center gap-3">
+                            <Ticket className="w-8 h-8 text-[#0057D9]" />
+                            Gerar Passagem
+                        </h1>
+                        <p className="text-gray-600 mt-1">
+                            Gerencie suas passagens para o transporte universitário
+                        </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                        <Badge className="bg-[#27AE60]/10 text-[#27AE60] border-[#27AE60]">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            {passagens.length} passagem(ns) ativa(s)
+                        </Badge>
+                    </div>
                 </div>
-            )}
 
-            {/* Só mostra form se ainda faltar turno */}
-            {turnosFaltando.length > 0 && (
-                <div className='grid grid-cols-1'>
-                    <Card className="border border-gray-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className='flex items-center gap-4'>
-                                <div className="flex w-10 h-10 rounded-sm bg-azul items-center justify-center">
-                                    <BusFront className="text-white" />
+                {/* Passagens Existentes */}
+                {passagens.length > 0 && (
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold text-[#1F1F1F] flex items-center gap-2">
+                            <BusFront className="w-6 h-6 text-[#0057D9]" />
+                            Minhas Passagens Ativas
+                        </h2>
+                        
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+                            {passagens.map((p, index) => (
+                                <Card key={index} className="border-none shadow-md hover:shadow-lg transition-all">
+                                    <CardHeader className="pb-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 bg-[#0057D9] rounded-lg flex items-center justify-center">
+                                                    <BusFront className="w-6 h-6 text-white" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg text-[#1F1F1F]">
+                                                        Passagem {p.turno}
+                                                    </CardTitle>
+                                                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                        <Calendar className="w-4 h-4" />
+                                                        {p.turno === 'Matutino' ? getAmanha() : getHoje()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Badge variant="outline" className={getBadgeColor(p.turno)}>
+                                                {p.turno === 'Matutino' ? '🌅' : '🌙'} {p.turno}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    
+                                    <CardContent className="space-y-4">
+                                        {/* Informações da passagem */}
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <User className="w-5 h-5 text-[#0057D9]" />
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Passageiro</p>
+                                                    <p className="font-semibold text-[#1F1F1F]">{p.nomeAluno}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <MapPin className="w-5 h-5 text-[#27AE60]" />
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Cidade de Destino</p>
+                                                    <p className="font-semibold text-[#1F1F1F]">{p.cidadeTransporte}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Rota */}
+                                        <div className="bg-gradient-to-r from-[#0057D9]/5 to-[#27AE60]/5 p-4 rounded-lg border border-[#0057D9]/20">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Route className="w-5 h-5 text-[#0057D9]" />
+                                                    <span className="font-medium text-[#1F1F1F]">{p.embarque}</span>
+                                                </div>
+                                                <ArrowRight className="w-4 h-4 text-gray-400" />
+                                                <div className="flex items-center gap-2">
+                                                    <Navigation className="w-5 h-5 text-[#27AE60]" />
+                                                    <span className="font-medium text-[#1F1F1F]">{p.desembarque}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => cancelarPassagem(p.turno)}
+                                            className="w-full"
+                                            disabled={loading}
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <Spinner size="w-4 h-4" color="border-white" />
+                                                    Cancelando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Cancelar Passagem
+                                                </>
+                                            )}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Formulário de Nova Passagem */}
+                {turnosFaltando.length > 0 && (
+                    <Card className="border-none shadow-md">
+                        <CardHeader className="pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-[#27AE60] rounded-lg flex items-center justify-center">
+                                    <Ticket className="w-6 h-6 text-white" />
                                 </div>
-                                <h1>Gerar Passagem</h1>
-                            </CardTitle>
+                                <div>
+                                    <CardTitle className="text-xl text-[#1F1F1F]">Nova Passagem</CardTitle>
+                                    <CardDescription>
+                                        Preencha os dados para gerar sua passagem
+                                    </CardDescription>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className='space-y-1'>
-                                <Label>Passageiro</Label>
-                                <Input type='text' value={nome || ''} disabled className="bg-gray-100" />
-                            </div>
-
-                            <div className='flex w-full gap-4'>
-                                <div className='w-full space-y-1'>
-                                    <Label>Para</Label>
-                                    <Input type='text' value={cidadeTransporte || ''} disabled className="bg-gray-100" />
-                                </div>
-                                <div className='w-full space-y-1'>
-                                    <Label>Turno</Label>
-                                    <Controller
-                                        control={control}
-                                        name="turno"
-                                        render={({ field }) => (
-                                            <Select value={field.value} onValueChange={(val) => { field.onChange(val); setNewTurno(val) }}>
-                                                <SelectTrigger className="w-full border border-gray-300 rounded-md">
-                                                    <SelectValue placeholder="Selecione seu turno" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {turnosFaltando.map(t => (
-                                                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
+                        
+                        <CardContent className="space-y-6">
+                            {/* Informações do usuário */}
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className='space-y-2'>
+                                    <Label className="text-sm font-medium text-[#1F1F1F]">Passageiro</Label>
+                                    <Input 
+                                        type='text' 
+                                        value={nome || ''} 
+                                        disabled 
+                                        className="bg-gray-50 border-gray-200" 
                                     />
-                                    {errors.turno && <p className="text-red-500 text-sm">{errors.turno.message}</p>}
+                                </div>
+                                <div className='space-y-2'>
+                                    <Label className="text-sm font-medium text-[#1F1F1F]">Cidade de Destino</Label>
+                                    <Input 
+                                        type='text' 
+                                        value={cidadeTransporte || ''} 
+                                        disabled 
+                                        className="bg-gray-50 border-gray-200" 
+                                    />
                                 </div>
                             </div>
 
-                            {/* Ponto de embarque/desembarque */}
-                            <div>
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Checkbox id='check1' checked={samePoint} onCheckedChange={() => setSamePoint(!samePoint)} />
-                                    <Label htmlFor='check1'>Mesmo ponto para ida e volta</Label>
+                            {/* Seleção de turno */}
+                            <div className='space-y-2'>
+                                <Label className="text-sm font-medium text-[#1F1F1F]">
+                                    <Clock className="w-4 h-4 inline mr-1" />
+                                    Turno
+                                </Label>
+                                <Controller
+                                    control={control}
+                                    name="turno"
+                                    render={({ field }) => (
+                                        <Select 
+                                            value={field.value} 
+                                            onValueChange={(val) => { 
+                                                field.onChange(val); 
+                                                setNewTurno(val) 
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full focus:ring-2 focus:ring-[#0057D9]">
+                                                <SelectValue placeholder="Selecione seu turno" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {turnosFaltando.map(t => (
+                                                    <SelectItem key={t} value={t}>
+                                                        {t === 'Matutino' ? '🌅' : '🌙'} {t}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                {errors.turno && (
+                                    <p className="text-red-500 text-sm">{errors.turno.message}</p>
+                                )}
+                            </div>
+
+                            {/* Configuração de pontos */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Checkbox 
+                                        id='samePoint' 
+                                        checked={samePoint} 
+                                        onCheckedChange={() => setSamePoint(!samePoint)} 
+                                    />
+                                    <Label htmlFor='samePoint' className="text-sm font-medium text-[#1F1F1F]">
+                                        Mesmo ponto para embarque e desembarque
+                                    </Label>
                                 </div>
 
                                 {samePoint ? (
-                                    <>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-medium text-[#1F1F1F]">
+                                            <MapPin className="w-4 h-4 inline mr-1" />
+                                            Ponto de Embarque/Desembarque
+                                        </Label>
                                         <Controller
                                             control={control}
                                             name="pontoIda"
@@ -374,11 +509,17 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                                 />
                                             )}
                                         />
-                                        {errors.pontoIda && <p className="text-red-500 text-sm">{errors.pontoIda.message}</p>}
-                                    </>
+                                        {errors.pontoIda && (
+                                            <p className="text-red-500 text-sm">{errors.pontoIda.message}</p>
+                                        )}
+                                    </div>
                                 ) : (
-                                    <>
-                                        <div className='flex w-full gap-4'>
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-[#1F1F1F]">
+                                                <Navigation className="w-4 h-4 inline mr-1" />
+                                                Ponto de Embarque
+                                            </Label>
                                             <Controller
                                                 control={control}
                                                 name="pontoIda"
@@ -391,6 +532,16 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                                     />
                                                 )}
                                             />
+                                            {errors.pontoIda && (
+                                                <p className="text-red-500 text-sm">{errors.pontoIda.message}</p>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-[#1F1F1F]">
+                                                <Route className="w-4 h-4 inline mr-1" />
+                                                Ponto de Desembarque
+                                            </Label>
                                             <Controller
                                                 control={control}
                                                 name="pontoVolta"
@@ -403,21 +554,55 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                                     />
                                                 )}
                                             />
+                                            {errors.pontoVolta && (
+                                                <p className="text-red-500 text-sm">{errors.pontoVolta.message}</p>
+                                            )}
                                         </div>
-                                        {errors.pontoIda && <p className="text-red-500 text-sm">{errors.pontoIda.message}</p>}
-                                        {errors.pontoVolta && <p className="text-red-500 text-sm">{errors.pontoVolta.message}</p>}
-                                    </>
+                                    </div>
                                 )}
                             </div>
 
-                            <Button disabled={loading} onClick={handleSubmit(onSubmit)} className='bg-azul hover:bg-blue-900'>
-                                {loading ? <><Spinner /> Gerando...</> : 'Gerar Passagem'}
+                            <Button 
+                                disabled={loading} 
+                                onClick={handleSubmit(onSubmit)} 
+                                className='w-full bg-[#0057D9] hover:bg-[#0057D9]/90 text-white h-12'
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner size="w-4 h-4" color="border-white" />
+                                        Gerando Passagem...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Ticket className="w-5 h-5 mr-2" />
+                                        Gerar Passagem
+                                    </>
+                                )}
                             </Button>
                         </CardContent>
                     </Card>
-                </div>
-            )}
-        </section>
+                )}
+
+                {/* Card de Informações */}
+                <Card className="border-none shadow-md border-l-4 border-l-[#FFB400]">
+                    <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                            <AlertTriangle className="w-6 h-6 text-[#FFB400] mt-1" />
+                            <div>
+                                <h3 className="font-semibold text-[#1F1F1F] mb-2">Informações Importantes</h3>
+                                <div className="space-y-1 text-sm text-gray-600">
+                                    <p>• Gere sua passagem até às 16:00h para garantir seu lugar no transporte</p>
+                                    <p>• Para o turno matutino, a passagem é válida para o dia seguinte</p>
+                                    <p>• Para o turno noturno, a passagem é válida para o mesmo dia</p>
+                                    <p>• Chegue ao ponto com pelo menos 5 minutos de antecedência</p>
+                                    <p>• Em caso de dúvidas, entre em contato conosco</p>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
 };
 

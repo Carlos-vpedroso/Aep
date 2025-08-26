@@ -49,7 +49,6 @@ async function removerAlunoLista(req, res) {
 
 async function verificarAlunoNaLista(req, res) {
     const { cidade, turno } = req.params;
-    const { id: idAluno } = req.params;
 
     try {
         let resultados = [];
@@ -102,5 +101,27 @@ async function verificarAlunoNaLista(req, res) {
     }
 }
 
+async function getAllAlunos(req, res) {
+    const { cidade, turno } = req.params;
 
-module.exports = { adicionarAlunoLista, removerAlunoLista, verificarAlunoNaLista };
+    try {
+        let controller;
+
+        if (cidade === "Batatais") controller = listaBatataisAlunosController;
+        else if (cidade === "Franca" && turno === "Matutino") controller = listaFrancaMatutinoAlunosController;
+        else if (cidade === "Franca" && turno === "Noturno") controller = listaFrancaNoturnoAlunosController;
+        else if (cidade === "Passos" && turno === "Matutino") controller = listaPassosMatutinoAlunosController;
+        else if (cidade === "Passos" && turno === "Noturno") controller = listaPassosNoturnoAlunosController;
+        else return res.status(400).json({ message: "Cidade ou turno inválido." });
+
+        // chama a função do controller correto
+        await controller.getAllAlunos(req, res);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro ao buscar alunos na lista." });
+    }
+}
+
+
+module.exports = { adicionarAlunoLista, removerAlunoLista, verificarAlunoNaLista, getAllAlunos };

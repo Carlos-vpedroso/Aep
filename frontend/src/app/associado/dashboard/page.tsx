@@ -149,8 +149,6 @@ export default function DashboardSidebar() {
             <Menu className="w-6 h-6" />
           </Button>
         </div>
-
-        <h1 className="text-2xl font-bold mb-4">{activeTab}</h1>
         {/* Conteúdo dinâmico baseado na tab ativa */}
         {(() => {
           switch (activeTab) {

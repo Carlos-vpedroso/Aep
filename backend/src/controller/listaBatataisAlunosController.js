@@ -2,7 +2,7 @@ const { ListaBatataisAlunosViewModel, ListaBatataisViewModel } = require("../vie
 
 const adicionarAlunoLista = async (req, res) => {
     try {
-        const { id: idAluno } = req.params; 
+        const { id: idAluno } = req.params;
         const { nomeAluno, embarque, desembarque } = req.body; // dados opcionais do aluno
 
         // Data de hoje no formato YYYY-MM-DD
@@ -110,4 +110,42 @@ const verificarAlunoNaLista = async (req, res, returnData = false) => {
     }
 };
 
-module.exports = { adicionarAlunoLista, removerAlunoLista, verificarAlunoNaLista };
+const getAllAlunos = async (req, res) => {
+    try {
+        const { data } = req.body; // Data passada pelo cliente
+
+        if (!data) {
+            return res.status(400).json({ message: "A data é obrigatória." });
+        }
+
+        // Buscar lista pela data informada
+        const lista = await ListaBatataisViewModel.findOne({
+            where: { data },
+        });
+
+        if (!lista) {
+            return res.status(404).json({ message: "Nenhuma lista encontrada para a data informada.", data: [] });
+        }
+
+        // Buscar todos os alunos vinculados à lista
+        const alunos = await ListaBatataisAlunosViewModel.findAll({
+            where: { idLista: lista.id },
+            attributes: ["idAluno", "nomeAluno", "embarque", "desembarque"], // apenas os campos relevantes
+        });
+
+        if (!alunos || alunos.length === 0) {
+            return res.status(200).json({ message: "Nenhum aluno encontrado na lista.", data: [] });
+        }
+
+        return res.status(200).json({
+            message: "Alunos encontrados com sucesso.",
+            data: alunos,
+        });
+
+    } catch (error) {
+        console.error("Erro ao buscar alunos da lista:", error);
+        return res.status(500).json({ message: "Erro interno do servidor." });
+    }
+};
+
+module.exports = { adicionarAlunoLista, removerAlunoLista, verificarAlunoNaLista, getAllAlunos };
