@@ -43,6 +43,7 @@ import Spinner from '../Spinner'
 import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types'
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
+import Link from 'next/link'
 
 export interface Associado {
     id: string;
@@ -213,33 +214,68 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
     }
 
     // Função para aplicar filtros
-    // Função para aplicar filtros
     const aplicarFiltros = () => {
         let dadosFiltrados = [...dados];
 
         // Filtro por nome
         if (filtros.nome && filtros.nome.trim() !== "") {
-            dadosFiltrados = dadosFiltrados.filter((item) =>
+            dadosFiltrados = dadosFiltrados.filter(item =>
                 item.nome.toLowerCase().includes(filtros.nome!.toLowerCase())
+            );
+        }
+
+        // Filtro por CPF
+        if (filtros.cpf && filtros.cpf.trim() !== "") {
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.cpf.includes(filtros.cpf!)
             );
         }
 
         // Filtro por situação
         if (filtros.situacao && filtros.situacao !== "") {
-            dadosFiltrados = dadosFiltrados.filter(
-                (item) => item.situacao === filtros.situacao
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.situacao === filtros.situacao
             );
         }
 
         // Filtro por faculdade
         if (filtros.faculdade && filtros.faculdade !== "") {
-            dadosFiltrados = dadosFiltrados.filter(
-                (item) => item.faculdade === filtros.faculdade
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.faculdade === filtros.faculdade
+            );
+        }
+
+        // Filtro por turno
+        if (filtros.turno && filtros.turno !== "") {
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.turno === filtros.turno
+            );
+        }
+
+        // Filtro por cidade
+        if (filtros.cidade && filtros.cidade !== "") {
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.cidadeTransporte === filtros.cidade
+            );
+        }
+
+        // Filtro por modalidade de transporte
+        if (filtros.modalidadeTransporte && filtros.modalidadeTransporte !== "") {
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.modalidadeTransporte === filtros.modalidadeTransporte
+            );
+        }
+
+        // Filtro por cidadeTransporte (caso queira diferenciar da cidade da faculdade)
+        if (filtros.cidadeTransporte && filtros.cidadeTransporte !== "") {
+            dadosFiltrados = dadosFiltrados.filter(item =>
+                item.cidadeTransporte === filtros.cidadeTransporte
             );
         }
 
         setFilteredDados(dadosFiltrados);
     };
+
 
 
     // Função para limpar filtros
@@ -343,7 +379,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
                             {/* Input Nome */}
                             <div className="space-y-2">
                                 <Label htmlFor="nome" className="text-sm font-medium text-[#1F1F1F]">
-                                    <User className='inline w-4 h-4 text-preto'/>
+                                    <User className='inline w-4 h-4 text-preto' />
                                     Nome
                                 </Label>
                                 <Input
@@ -358,7 +394,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
                             {/* Select Situação */}
                             <div className="space-y-2">
                                 <Label htmlFor="situacao" className="text-sm font-medium text-[#1F1F1F]">
-                                    <Pencil className='inline w-4 h-4 text-preto'/>
+                                    <Pencil className='inline w-4 h-4 text-preto' />
                                     Situação
                                 </Label>
                                 <Select
@@ -381,7 +417,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
                             {/* Select Faculdade */}
                             <div className="space-y-2">
                                 <Label htmlFor="faculdade" className="text-sm font-medium text-[#1F1F1F]">
-                                    <School className='inline w-4 h-4 text-preto'/>
+                                    <School className='inline w-4 h-4 text-preto' />
                                     Faculdade
                                 </Label>
                                 <Select
@@ -441,6 +477,28 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
                                         {cidades.map((cidade) => (
                                             <SelectItem key={cidade.value} value={cidade.value}>
                                                 {cidade.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {/* Select Modalidade */}
+                            <div className="space-y-2">
+                                <Label htmlFor="situacao" className="text-sm font-medium text-[#1F1F1F]">
+                                    <CreditCard className='inline w-4 h-4 text-preto' />
+                                    Situação
+                                </Label>
+                                <Select
+                                    value={filtros.modalidadeTransporte}
+                                    onValueChange={(value) => setFiltros((prev) => ({ ...prev, modalidadeTransporte: value }))}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Selecione a situação" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {modalidadeTransporte.map((s) => (
+                                            <SelectItem key={s.value} value={s.value}>
+                                                {s.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -582,20 +640,24 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
                                                     </TableCell>
                                                     <TableCell className="text-right">
                                                         <div className="flex items-center justify-end gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 p-0 hover:bg-[#0057D9]/10 hover:text-[#0057D9]"
-                                                            >
-                                                                <Eye className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 p-0 hover:bg-[#FFB400]/10 hover:text-[#FFB400]"
-                                                            >
-                                                                <Edit className="h-4 w-4" />
-                                                            </Button>
+                                                            <Link href={`/diretoria/dashboard/editAssociado/${item.id}`}>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0 hover:bg-[#0057D9]/10 hover:text-[#0057D9]"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                            <Link href={`/diretoria/dashboard/editAssociado/${item.id}`}>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0 hover:bg-[#FFB400]/10 hover:text-[#FFB400]"
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"

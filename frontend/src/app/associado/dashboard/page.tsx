@@ -12,6 +12,8 @@ import RotasDashboard from '@/components/dashboard/RotasDashboard'
 import HomeDashboard from '@/components/dashboard/HomeDashboard'
 import TravelDashboard from '@/components/dashboard/TravelDashboard'
 import AguardarAprovacao from '@/components/AguardarAprovacao'
+import PaymentDashboard from '@/components/dashboard/PaymentDashboard'
+import ProfileDashboard from '@/components/dashboard/ProfileDashboard'
 
 interface Tab {
   label: string;
@@ -33,7 +35,7 @@ export default function DashboardSidebar() {
     { label: "Rotas", icon: <Route size={20} /> },
     { label: "Pagamentos", icon: <FileText size={20} /> },
     { label: "Perfil", icon: <User size={20} /> },
-    { label: "Configurações", icon: <Settings size={20} /> },
+    // { label: "Configurações", icon: <Settings size={20} /> },
     { label: "Logout", icon: <LogOut size={20} />, isLogout: true, action: Logout },
   ];
 
@@ -156,7 +158,7 @@ export default function DashboardSidebar() {
               return (
                 <>
                   {userInfo && (
-                    <HomeDashboard usuario={userInfo} setTab={setActiveTab}/>
+                    <HomeDashboard usuario={userInfo} setTab={setActiveTab} />
                   )}
                 </>
               )
@@ -177,9 +179,19 @@ export default function DashboardSidebar() {
                 </>
               )
             case "Pagamentos":
-              return <p>Visualize seus pagamentos aqui.</p>;
+              return (
+                <>
+                  <PaymentDashboard />
+                </>
+              )
             case "Perfil":
-              return <p>Gerencie seu perfil.</p>;
+              return (
+                <>
+                  {userInfo && (
+                    <ProfileDashboard usuario={userInfo} />
+                  )}
+                </>
+              )
             case "Configurações":
               return <p>Ajustes e preferências.</p>;
             default:

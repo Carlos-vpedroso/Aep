@@ -11,6 +11,7 @@ import HomeDiretoria from '@/components/dashboardDiretoria/HomeDiretoria';
 import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types';
 import ListasDiretoria from '@/components/dashboardDiretoria/ListasDiretoria';
 import AssociadosDiretoria from '@/components/dashboardDiretoria/AssociadosDiretoria'
+import PagamentosDiretoria from '@/components/dashboardDiretoria/PagamentosDiretoria';
 
 interface Props { }
 
@@ -35,7 +36,7 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
         { label: "Listas", icon: <ListCollapse size={20} /> },
         { label: "Associados", icon: <Users size={20} /> },
         { label: "Pagamentos", icon: <FileText size={20} /> },
-        { label: "Configurações", icon: <Settings size={20} /> },
+        // { label: "Configurações", icon: <Settings size={20} /> },
         { label: "Logout", icon: <LogOut size={20} />, isLogout: true, action: Logout },
     ];
 
@@ -191,7 +192,11 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                                 </>
                             )
                         case "Pagamentos":
-                            return <p>Visualize seus pagamentos aqui.</p>
+                            return (
+                                <>
+                                    <PagamentosDiretoria/>
+                                </>
+                            )
                         case "Configurações":
                             return <p>Ajustes e preferências.</p>
                         default:
