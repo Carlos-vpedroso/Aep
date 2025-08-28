@@ -211,7 +211,6 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-[#0057D9] via-[#0057D9]/90 to-[#7C3AED]/80 min-h-[500px] overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
-        
         <div className="relative grid md:grid-cols-2 gap-8 w-11/12 max-w-7xl mx-auto px-4 py-12 items-center min-h-[500px]">
           <div className="space-y-6 text-white z-10">
             <div className="space-y-4">
@@ -233,7 +232,7 @@ export default function Home() {
               <Link href="/associado/cadastro">
                 <Button 
                   size="lg" 
-                  className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90 transition-all duration-300 hover:scale-105 shadow-lg"
+                  className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90 transition-all duration-300 hover:scale-105 shadow-lg cursor-pointer"
                 >
                   <User className="w-5 h-5 mr-2" />
                   Seja um Associado
