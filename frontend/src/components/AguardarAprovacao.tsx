@@ -212,14 +212,14 @@ const AguardarAprovacao: NextPage<Props> = ({}) => {
 
         {/* Ações */}
         <div className="flex justify-center gap-4">
-          <Button 
+          {/* <Button 
             variant="outline" 
             onClick={() => window.location.reload()}
             className="border-[#0057D9] text-[#0057D9] hover:bg-[#0057D9]/10"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Atualizar Status
-          </Button>
+          </Button> */}
           
           <Button 
             variant="outline" 

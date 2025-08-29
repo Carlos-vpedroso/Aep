@@ -61,7 +61,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token && { "Authorization": `Bearer ${token}` }), // se tiver token, envia no header
+                    ...(token && { "Authorization": `Bearer ${token}` }), 
                 },
             });
 

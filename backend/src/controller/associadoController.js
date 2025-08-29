@@ -1,6 +1,6 @@
 const { AssociadoViewModel } = require('../view/managerView.js');
 const bcrypt = require('bcryptjs');
-const { sendVerificationEmail } = require('../services/emailService.js');
+const sendVerificationEmail  = require('../services/emailService.js');
 const { v4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 
@@ -17,8 +17,6 @@ const getAllAssociados = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-
 
 // GET: quantidade de associados em todas as cidades
 const getAssociadosQuantidade = async (req, res) => {

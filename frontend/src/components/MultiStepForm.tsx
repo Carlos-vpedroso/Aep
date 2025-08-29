@@ -15,7 +15,7 @@ import {
 import { maskCPF, maskPhone, maskRG } from "@/lib/masks"
 import { isValidCPF, isValidPhone, isValidRG } from "@/lib/validations"
 import { toast } from "sonner"
-
+import Cookies from "js-cookie"
 
 interface Props {
     userInfo: UserInfo;
@@ -123,6 +123,7 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     };
 
     const handleSubmit = async () => {
+        
         // Campos obrigatórios
         const camposObrigatorios = [
             "rg",
@@ -165,10 +166,14 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
         }
 
         try {
+            const token = Cookies.get("token");
+            if (!token) return;
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
+                    ...(token && { "Authorization": `Bearer ${token}` }), 
                 },
                 body: JSON.stringify({
                     ...formData,

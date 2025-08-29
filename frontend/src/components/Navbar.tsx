@@ -18,8 +18,8 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Início', href: '/' },
-    { name: 'Diretoria', href: '/diretoria' },
-    { name: 'Motorista', href: '/motorista' },
+    { name: 'Diretoria', href: '/login' },
+    { name: 'Motorista', href: '/login' },
   ];
 
   const associadoLinks = [
@@ -43,9 +43,9 @@ export default function Navbar() {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-6">
-          {navLinks.map(link => (
+          {navLinks.map((link, idx) => (
             <Link
-              key={link.href}
+              key={idx}
               href={link.href}
               className="text-gray-600 hover:text-azul transition-colors duration-200 font-medium text-sm"
             >

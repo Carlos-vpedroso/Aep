@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export const sendVerificationEmail = async (to, token) => {
+const sendVerificationEmail = async (to, token) => {
   const verificationLink = `${process.env.URL_SITE}/associado/verificar/${token}`;
 
   await transporter.sendMail({
@@ -26,3 +26,5 @@ export const sendVerificationEmail = async (to, token) => {
     `
   });
 };
+
+module.exports = sendVerificationEmail;
