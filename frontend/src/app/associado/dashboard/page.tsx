@@ -7,7 +7,6 @@ import { useAuth } from "@/context"
 import Cookies from "js-cookie"
 import MultiStepForm from "@/components/MultiStepForm"
 import Image from "next/image"
-import logoAep from '../../../../public/LogoAEP-transparente2.png'
 import RotasDashboard from '@/components/dashboard/RotasDashboard'
 import HomeDashboard from '@/components/dashboard/HomeDashboard'
 import TravelDashboard from '@/components/dashboard/TravelDashboard'
@@ -150,9 +149,11 @@ export default function DashboardSidebar() {
         {/* Botão hamburger mobile */}
         <div className="md:hidden flex w-full items-center justify-between mb-6">
           <Image
-            src={logoAep}
+            src="/LogoAEP-transparente2.png"
             alt="A.E.P. Logo"
-            className="w-12 h-12 object-contain"
+            height={24}
+            width={24}
+            className="object-contain"
             priority
           />
           <Button variant="default" className="bg-azul" onClick={() => setSidebarOpen(true)}>

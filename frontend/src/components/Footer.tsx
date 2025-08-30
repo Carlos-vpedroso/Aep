@@ -17,17 +17,17 @@ const Footer = () => {
                     <h3 className="text-lg font-semibold mb-3">Links Úteis</h3>
                     <ul className="space-y-2">
                         <li>
-                            <Link href="/suporte" className="hover:underline">
+                            <Link href="/" className="hover:underline">
                                 Suporte
                             </Link>
                         </li>
                         <li>
-                            <Link href="/contato" className="hover:underline">
+                            <Link href="/" className="hover:underline">
                                 Entre em Contato
                             </Link>
                         </li>
                         <li>
-                            <Link href="/faq" className="hover:underline">
+                            <Link href="/" className="hover:underline">
                                 Dúvidas Frequentes
                             </Link>
                         </li>
@@ -38,9 +38,9 @@ const Footer = () => {
                 <div>
                     <h3 className="text-lg font-semibold mb-3">Contato</h3>
                     <ul className="space-y-2">
-                        <li>Email: <a href="mailto:contato@aep.org" className="hover:underline">contato@aep.org</a></li>
-                        <li>Telefone: (11) 99999-9999</li>
-                        <li>Endereço: Rua Exemplo, 123 - Cidade/UF</li>
+                        <li>Email: <a href="mailto:associacaodosestudantesa.e.p@gmail.com" className="hover:underline">associacaodosestudantesa.e.p@gmail.com</a></li>
+                        <li>Telefone: <a href="https://wa.me/5535991220988" className="hover:underline">(35) 99122-0988</a></li>
+                        <li>Endereço: Rua Manoel De Oliveira Mafra, 932 - São Sebastião do Paraíso/MG</li>
                     </ul>
                 </div>
 
@@ -57,7 +57,7 @@ const Footer = () => {
                         <a href="https://wa.me/5535991220988" target="_blank" rel="noreferrer" className="hover:text-yellow-400">
                             <FaWhatsapp />
                         </a>
-                        <a href="mailto:contato@aep.org" className="hover:text-yellow-400">
+                        <a href="mailto:associacaodosestudantesa.e.p@gmail.com" className="hover:text-yellow-400">
                             <FaEnvelope />
                         </a>
                     </div>

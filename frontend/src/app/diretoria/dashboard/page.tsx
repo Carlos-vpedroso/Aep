@@ -6,7 +6,6 @@ import { useAuth } from '@/context';
 import { Button } from '@/components/ui/button';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
-import logoAep from '../../../../public/LogoAEP-transparente2.png'
 import HomeDiretoria from '@/components/dashboardDiretoria/HomeDiretoria';
 import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types';
 import ListasDiretoria from '@/components/dashboardDiretoria/ListasDiretoria';
@@ -144,11 +143,13 @@ const DasboardSideBar: NextPage = () => {
             {/* Conteúdo principal */}
             <main className="flex-1 p-8">
                 {/* Botão hamburger mobile */}
-                <div className="md:hidden flex w-full items-center justify-between mb-6">
+                <div className="md:hidden flex w-full items-center justify-between mb-6 ">
                     <Image
-                        src={logoAep}
+                        src="/LogoAEP-transparente2.png"
                         alt="A.E.P. Logo"
-                        className="w-12 h-12 object-contain"
+                        width={24}
+                        height={24}
+                        className="object-contain"
                         priority
                     />
                     <Button variant="default" className="bg-azul" onClick={() => setSidebarOpen(true)}>
@@ -156,14 +157,14 @@ const DasboardSideBar: NextPage = () => {
                     </Button>
                 </div>
 
-    
+
                 {/* Conteúdo dinâmico baseado na tab ativa */}
                 {(() => {
                     switch (activeTab) {
                         case "Home":
                             return (
                                 <>
-                                    { quantidadePorModalidade && quantidadePorSituacao && (
+                                    {quantidadePorModalidade && quantidadePorSituacao && (
                                         <HomeDiretoria
                                             quantidadesModalidade={quantidadePorModalidade}
                                             quantidadesSituacao={quantidadePorSituacao}
@@ -174,13 +175,13 @@ const DasboardSideBar: NextPage = () => {
                         case "Listas":
                             return (
                                 <>
-                                    <ListasDiretoria/>
+                                    <ListasDiretoria />
                                 </>
                             )
                         case "Associados":
                             return (
                                 <>
-                                    { quantidadePorCidade && quantidadePorModalidade && quantidadePorSituacao && (
+                                    {quantidadePorCidade && quantidadePorModalidade && quantidadePorSituacao && (
                                         <AssociadosDiretoria
                                             quantidadesModalidade={quantidadePorModalidade}
                                             quantidadesSituacao={quantidadePorSituacao}
@@ -192,7 +193,7 @@ const DasboardSideBar: NextPage = () => {
                         case "Pagamentos":
                             return (
                                 <>
-                                    <PagamentosDiretoria/>
+                                    <PagamentosDiretoria />
                                 </>
                             )
                         default:

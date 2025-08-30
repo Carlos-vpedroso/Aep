@@ -1,7 +1,6 @@
 "use client"
 
 import Navbar from '@/components/Navbar'
-import estudanteFoto from '../../../../public/estudante-formulario2.png'
 import Image from 'next/image'
 import { NextPage } from 'next'
 import { z } from "zod"
@@ -113,9 +112,11 @@ const Formulario: NextPage = () => {
                     {/* Imagem */}
                     <div className="hidden md:block">
                         <Image
-                            src={estudanteFoto}
+                            src="/estudante-formulario2.png"
                             alt="Foto do estudante"
                             priority
+                            width={1000}
+                            height={1000}
                             className="w-full h-full object-cover"
                         />
                     </div>

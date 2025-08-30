@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import estudanteOnibus from '../../public/EstudanteOnibus.png'
 import { 
   BusFront, 
   ChevronRight, 
@@ -237,14 +236,16 @@ export default function Home() {
                   Seja um Associado
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="border-white/30 text-preto hover:bg-yellow-500/80 backdrop-blur-sm cursor-pointer"
-              >
-                <Phone className="w-5 h-5 mr-2" />
-                Entre em Contato
-              </Button>
+              <Link href="https://wa.me/5535991220988">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="border-white/30 text-preto hover:bg-yellow-500/80 backdrop-blur-sm cursor-pointer"
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  Entre em Contato
+                </Button>
+              </Link>
             </div>
 
             {/* Stats na Hero */}
@@ -261,8 +262,10 @@ export default function Home() {
           <div className="flex items-center justify-center relative">
             <div className="absolute inset-0 bg-gradient-to-r from-[#FFB400]/20 to-[#27AE60]/20 rounded-3xl blur-3xl"></div>
             <Image
-              src={estudanteOnibus}
+              src="/EstudanteOnibus.png"
               alt="Estudante no Ônibus"
+              width={600}
+              height={400}
               className="relative w-full max-w-md h-auto object-contain drop-shadow-2xl"
               priority
             />
@@ -478,7 +481,7 @@ export default function Home() {
                       <Phone className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-[#1F1F1F]">(35) 99999-9999</p>
+                      <p className="font-medium text-[#1F1F1F]">(35) 99122-0988</p>
                       <p className="text-sm text-gray-500">WhatsApp</p>
                     </div>
                   </div>
@@ -487,16 +490,17 @@ export default function Home() {
                       <Mail className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-[#1F1F1F]">contato@aep.com.br</p>
+                      <p className="font-medium text-[#1F1F1F]">associacaodosestudantesa.e.p@gmail.com</p>
                       <p className="text-sm text-gray-500">E-mail</p>
                     </div>
                   </div>
                 </div>
-                
-                <Button className="w-full mt-6 bg-[#0057D9] hover:bg-[#0057D9]/90">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Falar Conosco
-                </Button>
+                <Link href="https://wa.me/5535991220988">
+                  <Button className="w-full mt-6 bg-[#0057D9] hover:bg-[#0057D9]/90">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Falar Conosco
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

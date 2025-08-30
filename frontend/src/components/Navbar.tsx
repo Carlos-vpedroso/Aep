@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, LogIn, User, Menu, X } from "lucide-react";
-import logoAep from '../../public/LogoAEP-transparente2.png';
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,9 +33,11 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src={logoAep}
+            src="/LogoAEP-transparente2.png"
             alt="A.E.P. Logo"
-            className="w-12 h-12 md:w-15 md:h-15 object-contain"
+            width={48}
+            height={48}
+            className="object-contain"
             priority
           />
         </Link>
