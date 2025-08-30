@@ -11,17 +11,16 @@ import {
   Activity,
   Calendar,
   BarChart3,
-  PieChart,
   Target,
   Clock,
   CheckCircle2,
+  PieChart,
 } from 'lucide-react'
-import { QuantidadeAssociadosCidade, QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types'
+import { QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types'
 import { useAuth } from '@/context'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import Autoplay from "embla-carousel-autoplay"
 import Spinner from '../Spinner'
-import { RendaMensalChart } from '../RendaMensalChart'
 
 interface Props {
   quantidadesModalidade: QuantidadeAssociadosModalidade;
@@ -205,14 +204,13 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
               </div>
             </CardHeader>
             <CardContent>
-              <RendaMensalChart/>
-              {/* <div className="h-64 bg-gradient-to-br from-[#0057D9]/5 to-[#7C3AED]/5 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
+              <div className="h-64 bg-gradient-to-br from-[#0057D9]/5 to-[#7C3AED]/5 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
                 <div className="text-center">
                   <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-500">Gráfico será renderizado aqui</p>
-                  <p className="text-xs text-gray-400 mt-1">Integração com biblioteca de gráficos</p>
+                  <p className="text-xs text-gray-400 mt-1">Integração com biblioteca de gráficos futuramente.</p>
                 </div>
-              </div> */}
+              </div>
             </CardContent>
           </Card>
 

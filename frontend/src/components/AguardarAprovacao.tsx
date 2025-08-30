@@ -14,9 +14,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from "@/context"
 
-interface Props {}
 
-const AguardarAprovacao: NextPage<Props> = ({}) => {
+
+const AguardarAprovacao: NextPage = () => {
   const { Logout } = useAuth()
 
   const etapasProcesso = [

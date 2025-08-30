@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -69,17 +69,17 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     const [rg, setRg] = useState<string>("")
     const [ufEmissao, setUfEmissao] = useState<string>("")
 
+    const handleChange = useCallback((field: keyof UserInfo, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
     useEffect(() => {
         if (rg && ufEmissao) {
             handleChange("rg", `${ufEmissao}-${rg}`);
         } else {
             handleChange("rg", rg);
         }
-    }, [rg, ufEmissao]);
-
-    const handleChange = (field: keyof UserInfo, value: string) => {
-        setFormData({ ...formData, [field]: value })
-    }
+    }, [rg, ufEmissao, handleChange]);
 
     const nextStep = () => {
         if (step < steps.length - 1) setStep(step + 1)
@@ -123,7 +123,7 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     };
 
     const handleSubmit = async () => {
-        
+
         // Campos obrigatórios
         const camposObrigatorios = [
             "rg",
@@ -173,7 +173,7 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token && { "Authorization": `Bearer ${token}` }), 
+                    ...(token && { "Authorization": `Bearer ${token}` }),
                 },
                 body: JSON.stringify({
                     ...formData,

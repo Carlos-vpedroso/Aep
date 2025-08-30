@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import { BarChart, Bar, CartesianGrid, XAxis, Tooltip } from "recharts"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { ChartConfig, ChartContainer } from "@/components/ui/chart"
-import { Button } from "@/components/ui/button"
-import { DollarSign } from "lucide-react"
+
 
 // Dados mockados de renda mensal (últimos 6 meses)
 const rendaMensal = [

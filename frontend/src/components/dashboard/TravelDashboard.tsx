@@ -35,6 +35,7 @@ import * as z from 'zod';
 import { useAuth } from '@/context';
 import Spinner from '../Spinner';
 import { toast } from 'sonner';
+import { Passagem } from '@/types';
 
 interface Props {
     nome: string | null;
@@ -42,6 +43,19 @@ interface Props {
     turno: string | null;
     id: string | null;
 }
+
+interface SubmitType {
+    nomeAluno: string | null;
+    embarque: string;
+    desembarque: string;
+}
+
+interface FormData {
+  turno: string;
+  pontoIda: string;
+  pontoVolta?: string;
+}
+
 
 // ======== LISTAS DE PONTOS ==========
 const pontosFrancaNoturno = [
@@ -119,7 +133,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
     const [newTurno, setNewTurno] = useState("");
     const [samePoint, setSamePoint] = useState(true);
     const [pontos, setPontos] = useState<string[]>([]);
-    const [passagens, setPassagens] = useState<any[]>([]);
+    const [passagens, setPassagens] = useState<Passagem[]>([]);
     const { loading, setLoading } = useAuth();
 
     const { handleSubmit, control, watch, setValue, setError, clearErrors, formState: { errors } } = useForm({
@@ -161,8 +175,9 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                     const data = await res.json();
                     setPassagens(Array.isArray(data) ? data : [data]);
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error("Erro ao buscar passagens", error);
+                toast.error("Erro ao buscar passagens")
             } finally {
                 setLoading(false);
             }
@@ -181,13 +196,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
         setValue("pontoVolta", "");
     }, [cidadeTransporte, newTurno, setValue, turno]);
 
-    const onSubmit = async (formData: any) => {
-        const payload = {
-            nomeAluno: nome,
-            embarque: formData.pontoIda,
-            desembarque: samePoint ? formData.pontoIda : formData.pontoVolta
-        };
-
+    const onSubmit = async (formData: FormData) => {
         if (!samePoint && !formData.pontoVolta) {
             setError("pontoVolta", {
                 type: "manual",
@@ -195,6 +204,12 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             });
             return;
         }
+
+        const payload: SubmitType = {
+            nomeAluno: nome,
+            embarque: formData.pontoIda,
+            desembarque: samePoint ? formData.pontoIda : formData.pontoVolta || formData.pontoIda
+        };
 
         const token = Cookies.get("token");
         if (!token) {
@@ -225,7 +240,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             setPassagens(prev => [...prev, { ...payload, turno: newTurno, cidadeTransporte }]);
             toast.success("Passagem gerada com sucesso!");
 
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(error);
             toast.error("Não foi possível conectar ao servidor.");
         } finally {

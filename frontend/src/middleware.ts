@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
     // console.log(payload)
 
     return NextResponse.next()
-  } catch (err) {
+  } catch {
     // Token inválido ou expirado → redireciona para login
     return NextResponse.redirect(new URL('/login', req.url))
   }

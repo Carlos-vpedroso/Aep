@@ -1,7 +1,7 @@
 'use client'
 import { NextPage } from 'next'
 import React, { useState, useEffect } from 'react'
-import { Home, FileText, Settings, LogOut, X, Menu, ListCollapse, Users, Pencil } from 'lucide-react'
+import { Home, FileText, LogOut, X, Menu, ListCollapse, Users } from 'lucide-react'
 import { useAuth } from '@/context';
 import { Button } from '@/components/ui/button';
 import Cookies from 'js-cookie';
@@ -13,8 +13,6 @@ import ListasDiretoria from '@/components/dashboardDiretoria/ListasDiretoria';
 import AssociadosDiretoria from '@/components/dashboardDiretoria/AssociadosDiretoria'
 import PagamentosDiretoria from '@/components/dashboardDiretoria/PagamentosDiretoria';
 
-interface Props { }
-
 interface Tab {
     label: string;
     icon: React.ReactNode;
@@ -22,7 +20,7 @@ interface Tab {
     isLogout?: boolean;
 }
 
-const DasboardSideBar: NextPage<Props> = ({ }) => {
+const DasboardSideBar: NextPage = () => {
     const { Logout, setLoading } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Home');
@@ -197,8 +195,6 @@ const DasboardSideBar: NextPage<Props> = ({ }) => {
                                     <PagamentosDiretoria/>
                                 </>
                             )
-                        case "Configurações":
-                            return <p>Ajustes e preferências.</p>
                         default:
                             return <p>Selecione uma aba.</p>
                     }

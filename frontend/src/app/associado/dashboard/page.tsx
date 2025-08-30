@@ -2,7 +2,7 @@
 import React from 'react'
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { X, Menu, Home, Ticket, User, Route, FileText, Settings, LogOut } from "lucide-react"
+import { X, Menu, Home, Ticket, User, Route, FileText, LogOut } from "lucide-react"
 import { useAuth } from "@/context"
 import Cookies from "js-cookie"
 import MultiStepForm from "@/components/MultiStepForm"
@@ -14,6 +14,7 @@ import TravelDashboard from '@/components/dashboard/TravelDashboard'
 import AguardarAprovacao from '@/components/AguardarAprovacao'
 import PaymentDashboard from '@/components/dashboard/PaymentDashboard'
 import ProfileDashboard from '@/components/dashboard/ProfileDashboard'
+import Spinner from '@/components/Spinner'
 
 interface Tab {
   label: string;
@@ -64,7 +65,15 @@ export default function DashboardSidebar() {
     };
 
     fetchUserInfo();
-  }, []);
+  }, [getInformations, setLoading, setUserInfo]);
+
+  if (loading) {
+    return (
+      <div className="rounded-md flex flex-1 min-h-screen justify-center items-center bg-white">
+        <Spinner size="w-10 h-10" color="border-blue-500" />
+      </div>
+    );
+  }
 
   if (userInfo?.firstTime) {
     return (
@@ -81,7 +90,6 @@ export default function DashboardSidebar() {
       </section>
     )
   }
-
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -192,8 +200,6 @@ export default function DashboardSidebar() {
                   )}
                 </>
               )
-            case "Configurações":
-              return <p>Ajustes e preferências.</p>;
             default:
               return <p>Selecione uma aba.</p>;
           }

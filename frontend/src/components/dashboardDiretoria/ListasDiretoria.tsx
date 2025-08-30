@@ -1,6 +1,6 @@
 'use client'
 import { NextPage } from 'next'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Cookies from 'js-cookie'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,10 +30,7 @@ import {
     Users,
     Calendar,
     MapPin,
-    Clock,
-    Eye,
-    Edit,
-    Trash2,
+    Clock
 } from 'lucide-react'
 import { useAuth } from '@/context'
 import Spinner from '../Spinner'
@@ -54,7 +51,6 @@ interface Filtros {
 
 const ListasDiretoria: NextPage = () => {
     const { loading, setLoading } = useAuth()
-    const [dados, setDados] = useState<Aluno[]>([])
     const [filteredDados, setFilteredDados] = useState<Aluno[]>([])
     const [filtros, setFiltros] = useState<Filtros>({
         turno: '',
@@ -98,7 +94,6 @@ const ListasDiretoria: NextPage = () => {
             }
 
             const result = await response.json();
-            setDados(result.data);
             setFilteredDados(result.data);
             setSearchedTurno(filtros.turno);
         } catch (error) {

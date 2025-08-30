@@ -72,8 +72,12 @@ const EditAssociado: NextPage = () => {
 
         const data = await res.json();
         setFormData(data);
-      } catch (error) {
-        toast.error("Não foi possível carregar os dados do associado.");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(`Erro: ${error.message}`);
+        } else {
+          toast.error("Erro desconhecido ao carregar os dados do associado.");
+        }
       } finally {
         setLoading(false);
       }
@@ -109,7 +113,7 @@ const EditAssociado: NextPage = () => {
 
       toast.success("✅ Associado atualizado com sucesso!");
       setTimeout(() => router.push("/diretoria/dashboard"), 2000);
-    } catch (error) {
+    } catch {
       toast.error("❌ Ocorreu um erro ao salvar as alterações.");
     } finally {
       setSaving(false);

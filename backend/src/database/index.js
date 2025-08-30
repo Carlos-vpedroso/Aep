@@ -1,18 +1,23 @@
-
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT,
-    port: process.env.DB_PORT || 3306,
-    logging: console.log, // true para ver queries no console
-  }
-);
+// Se a variável MYSQL_PUBLIC_URL existir, usa ela; 
+const sequelize = process.env.MYSQL_PUBLIC_URL
+  ? new Sequelize(process.env.MYSQL_PUBLIC_URL, {
+      dialect: "mysql",
+      // logging: console.log,
+    })
+  : new Sequelize(
+      process.env.DB_NAME,
+      process.env.DB_USER,
+      process.env.DB_PASSWORD,
+      {
+        host: process.env.DB_HOST,
+        dialect: process.env.DB_DIALECT,
+        port: process.env.DB_PORT || 3306,
+        // logging: console.log,
+      }
+    );
 
 // Testa conexão
 async function connect() {

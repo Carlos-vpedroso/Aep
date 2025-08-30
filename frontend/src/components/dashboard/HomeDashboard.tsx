@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   User,
   Mail,
@@ -74,10 +73,11 @@ export default function HomeDashboard({ usuario, setTab }: Props) {
   ];
 
   const recentActivities = [
-    { action: "Passagem gerada", date: "Hoje, 14:30", status: "success" },
-    { action: "Pagamento realizado", date: "Ontem, 09:15", status: "success" },
-    { action: "Perfil atualizado", date: "2 dias atrás", status: "info" }
+    { action: "Cadastro confirmado", date: "Hoje, 10:00", status: "success" },
+    { action: "Formulário enviado", date: "Ontem, 18:45", status: "success" },
+    { action: "Solicitação de transporte", date: "3 dias atrás", status: "success" }
   ];
+
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] p-6">
@@ -207,11 +207,11 @@ export default function HomeDashboard({ usuario, setTab }: Props) {
                 {recentActivities.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === 'success' ? 'bg-[#27AE60]' :
-                        activity.status === 'warning' ? 'bg-[#FFB400]' : 'bg-[#0057D9]'
+                      activity.status === 'warning' ? 'bg-[#FFB400]' : 'bg-[#0057D9]'
                       }`} />
                     <div className="flex-1">
                       <p className="text-sm text-[#1F1F1F] font-medium">{activity.action}</p>
-                      <p className="text-xs text-gray-500">{activity.date}</p>
+                      {/* <p className="text-xs text-gray-500">{activity.date}</p> */}
                     </div>
                   </div>
                 ))}

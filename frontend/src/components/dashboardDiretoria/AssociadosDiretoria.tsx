@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,6 @@ import {
     Download,
     RefreshCw,
     Users,
-    Calendar,
     MapPin,
     Clock,
     Eye,
@@ -185,7 +184,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
 
 
     // Função para buscar dados da API
-    const fetchDados = async () => {
+    const fetchDados = useCallback( async () => {
         setLoading(true)
         try {
             const token = Cookies.get("token");
@@ -211,7 +210,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
         } finally {
             setLoading(false)
         }
-    }
+    }, [setLoading]);
 
     // Função para aplicar filtros
     const aplicarFiltros = () => {
@@ -319,7 +318,7 @@ const AssociadosDiretoria: NextPage<Props> = ({ quantidadesCidade, quantidadesMo
     // Carregar dados iniciais
     useEffect(() => {
         fetchDados()
-    }, [])
+    }, [fetchDados])
 
     // Loading da autenticação
     if (loading) {

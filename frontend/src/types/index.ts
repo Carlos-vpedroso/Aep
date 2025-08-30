@@ -46,3 +46,11 @@ export interface QuantidadeAssociadosSituacao {
   Pendente: number;
   Inativo: number;
 }
+
+export interface Passagem {
+  nomeAluno: string | null;
+  embarque: string;
+  desembarque: string;
+  turno: string;
+  cidadeTransporte: string | null;
+}

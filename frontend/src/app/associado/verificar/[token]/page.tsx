@@ -1,7 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
@@ -28,10 +27,12 @@ export default function VerificarPage() {
             <section className="flex w-full h-screen justify-center items-center bg-gray-50 px-4">
                 <div className="text-center max-w-md bg-white p-8 rounded-lg shadow-md">
                     <h1 className="text-3xl font-bold text-azul mb-4">
-                        Cadastro Confirmado!
+                        {status}
                     </h1>
                     <p className="text-gray-700 mb-6">
-                        Parabéns, seu cadastro foi validado com sucesso. Agora você pode acessar a área do associado e aproveitar todos os benefícios.
+                        {status.startsWith("✅")
+                            ? "Parabéns, seu cadastro foi validado com sucesso. Agora você pode acessar a área do associado e aproveitar todos os benefícios."
+                            : "Estamos validando seu cadastro, aguarde..."}
                     </p>
                     <Link
                         href="/login"

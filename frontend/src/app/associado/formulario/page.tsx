@@ -92,8 +92,12 @@ const Formulario: NextPage = () => {
 
             form.reset(); // limpa os campos
 
-        } catch (error: any) {
-            toast.error(`Erro: ${error.message}`);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(`Erro: ${error.message}`);
+            } else {
+                toast.error("Erro desconhecido");
+            }
         } finally {
             setLoading(false);
         }
@@ -270,7 +274,7 @@ const Formulario: NextPage = () => {
                                     )}
                                 />
 
-                                <Button disabled={loading? true : false} type="submit" className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2">
+                                <Button disabled={loading ? true : false} type="submit" className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2">
                                     {loading && <Spinner />}
                                     {loading ? "Processando..." : "Enviar Cadastro"}
                                 </Button>
