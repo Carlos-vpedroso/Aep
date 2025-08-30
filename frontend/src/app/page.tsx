@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { 
-  BusFront, 
-  ChevronRight, 
-  MapPin, 
-  User, 
-  Wallet, 
+import {
+  BusFront,
+  ChevronRight,
+  MapPin,
+  User,
+  Wallet,
   Clock,
   Star,
   Shield,
@@ -79,7 +79,7 @@ export default function Home() {
       link: "/associado/cadastro"
     },
     {
-      step: "02", 
+      step: "02",
       icon: Wallet,
       title: "Pagamento",
       description: "Escolha o plano que melhor se adapta à sua rotina",
@@ -193,8 +193,8 @@ export default function Home() {
   ];
 
   const getTurnoColor = (turno: string) => {
-    return turno === 'Matutino' ? 
-      'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]' : 
+    return turno === 'Matutino' ?
+      'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]' :
       'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]';
   };
 
@@ -205,7 +205,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-[#0057D9] via-[#0057D9]/90 to-[#7C3AED]/80 min-h-[500px] overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -221,15 +221,15 @@ export default function Home() {
                 <span className="text-[#FFB400]">universitários</span>
               </h1>
               <p className="text-xl text-blue-100 leading-relaxed">
-                Oferecemos transporte seguro e confiável para estudantes universitários até suas faculdades, 
+                Oferecemos transporte seguro e confiável para estudantes universitários até suas faculdades,
                 conectando sonhos à educação.
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/associado/cadastro">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90 transition-all duration-300 hover:scale-105 shadow-lg cursor-pointer"
                 >
                   <User className="w-5 h-5 mr-2" />
@@ -237,8 +237,8 @@ export default function Home() {
                 </Button>
               </Link>
               <Link href="https://wa.me/5535991220988">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
                   className="border-white/30 text-preto hover:bg-yellow-500/80 backdrop-blur-sm cursor-pointer"
                 >
@@ -279,7 +279,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#1F1F1F] mb-4">Por que escolher a A.E.P?</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Oferecemos muito mais que transporte. Oferecemos segurança, pontualidade e a tranquilidade 
+              Oferecemos muito mais que transporte. Oferecemos segurança, pontualidade e a tranquilidade
               que você precisa para focar nos seus estudos.
             </p>
           </div>
@@ -320,13 +320,13 @@ export default function Home() {
                   <div className={`w-16 h-16 bg-[#27AE60] rounded-2xl mb-4 flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <step.icon className="w-8 h-8 text-white" />
                   </div>
-                  
+
                   <h3 className="text-xl font-semibold text-[#1F1F1F] mb-3">{step.title}</h3>
                   <p className="text-gray-600 mb-4">{step.description}</p>
-                  
+
                   <Link href={step.link}>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="text-[#0057D9] hover:bg-[#0057D9]/10 p-0 h-auto font-medium group"
                     >
                       Saiba mais
@@ -440,21 +440,17 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-16 bg-white">
-        <div className="w-11/12 max-w-7xl mx-auto px-4">
+      <section className="py-16 bg-white overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-[#0057D9] mb-6">Sobre a Associação</h2>
               <div className="space-y-4 text-gray-600">
                 <p className="text-lg leading-relaxed">
-                  Somos uma associação sem fins lucrativos criada para garantir transporte acessível e seguro 
-                  aos estudantes universitários da região. Desde 2020, já ajudamos mais de 300 alunos a 
-                  chegarem até suas instituições de ensino com conforto e segurança.
+                  Somos uma associação sem fins lucrativos criada para garantir transporte acessível e seguro aos estudantes universitários da região. Desde 2020, já ajudamos mais de 300 alunos a chegarem até suas instituições de ensino com conforto e segurança.
                 </p>
                 <p>
-                  Nossa missão é democratizar o acesso à educação superior, oferecendo uma alternativa 
-                  de transporte confiável e economicamente viável para estudantes que precisam se deslocar 
-                  entre cidades para estudar.
+                  Nossa missão é democratizar o acesso à educação superior, oferecendo uma alternativa de transporte confiável e economicamente viável para estudantes que precisam se deslocar entre cidades para estudar.
                 </p>
               </div>
 
@@ -472,8 +468,8 @@ export default function Home() {
               </div>
             </div>
 
-            <Card className="border-none shadow-xl">
-              <CardContent className="p-8">
+            <Card className="border-none shadow-xl w-full max-w-md mx-auto">
+              <CardContent className="p-6 sm:p-4">
                 <h3 className="text-xl font-semibold text-[#1F1F1F] mb-6 text-center">Entre em Contato</h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -506,6 +502,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
 
       <Footer />
     </>

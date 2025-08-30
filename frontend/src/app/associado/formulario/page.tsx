@@ -110,13 +110,13 @@ const Formulario: NextPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-11/12 max-w-6xl bg-white rounded-lg shadow-lg overflow-hidden">
 
                     {/* Imagem */}
-                    <div className="hidden md:block">
+                    <div className="hidden md:block w-full h-full">
                         <Image
                             src="/Estudante-formulario2.png"
                             alt="Foto do estudante"
                             priority
-                            width={1000}
-                            height={1000}
+                            width={900}
+                            height={900}
                             className="w-full h-full object-cover"
                         />
                     </div>
