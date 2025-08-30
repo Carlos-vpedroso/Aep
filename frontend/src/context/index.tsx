@@ -1,5 +1,5 @@
 "use client"
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
@@ -55,7 +55,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const getInformations = async (id: string, token: string): Promise<UserInfo | null> => {
+    const getInformations = useCallback(async (id: string, token: string): Promise<UserInfo | null> => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
                 method: "GET",
@@ -77,7 +77,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error("Erro ao conectar com a API:", error);
             return null;
         }
-    };
+    }, []);
 
     const Logout = () => {
         Cookies.remove('user');

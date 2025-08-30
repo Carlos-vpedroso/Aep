@@ -48,7 +48,7 @@ export default function DashboardSidebar() {
 
         const userObj = JSON.parse(userCookie);
         const id = userObj.id;
-        setIdUser(id)
+        setIdUser(id);
 
         const token = Cookies.get("token");
         if (!token) return;
@@ -64,7 +64,9 @@ export default function DashboardSidebar() {
     };
 
     fetchUserInfo();
-  }, [getInformations, setLoading, setUserInfo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // <-- vazio para rodar apenas uma vez
+
 
   if (loading) {
     return (
