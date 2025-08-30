@@ -68,6 +68,7 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     const [formData, setFormData] = useState<UserInfo>(userInfo)
     const [rg, setRg] = useState<string>("")
     const [ufEmissao, setUfEmissao] = useState<string>("")
+    const [validating, setValidating] = useState<boolean>(false)
 
     const handleChange = useCallback((field: keyof UserInfo, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -123,7 +124,7 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
     };
 
     const handleSubmit = async () => {
-
+        setValidating(true)
         // Campos obrigatórios
         const camposObrigatorios = [
             "rg",
@@ -396,8 +397,9 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
                     <Button
                         className="bg-green-500 hover:bg-green-600 text-white transition-colors"
                         onClick={handleSubmit}
+                        disabled={validating}
                     >
-                        Concluir
+                        {validating ? "Validando..." : "Concluir"}
                     </Button>
                 )}
             </div>

@@ -14,14 +14,14 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import Cookies from 'js-cookie';
-import { 
-    BusFront, 
-    Trash2, 
-    MapPin, 
-    Clock, 
-    Calendar, 
-    User, 
-    Route, 
+import {
+    BusFront,
+    Trash2,
+    MapPin,
+    Clock,
+    Calendar,
+    User,
+    Route,
     AlertTriangle,
     CheckCircle2,
     ArrowRight,
@@ -51,9 +51,9 @@ interface SubmitType {
 }
 
 interface FormData {
-  turno: string;
-  pontoIda: string;
-  pontoVolta?: string;
+    turno: string;
+    pontoIda: string;
+    pontoVolta?: string;
 }
 
 
@@ -134,7 +134,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
     const [samePoint, setSamePoint] = useState(true);
     const [pontos, setPontos] = useState<string[]>([]);
     const [passagens, setPassagens] = useState<Passagem[]>([]);
-    const { loading, setLoading } = useAuth();
+    const [localLoading, setLocalLoading] = useState(false);
 
     const { handleSubmit, control, watch, setValue, setError, clearErrors, formState: { errors } } = useForm({
         resolver: zodResolver(passagemSchema),
@@ -163,7 +163,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             if (!token) return;
 
             try {
-                setLoading(true);
+                setLocalLoading(true);
                 const res = await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL}/associados/${cidadeTransporte}/${turno}/${id}`,
                     {
@@ -179,12 +179,12 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                 console.error("Erro ao buscar passagens", error);
                 toast.error("Erro ao buscar passagens")
             } finally {
-                setLoading(false);
+                setLocalLoading(false);
             }
         };
 
         fetchPassagens();
-    }, [cidadeTransporte, turno, id, setLoading]);
+    }, [cidadeTransporte, turno, id]);
 
     useEffect(() => {
         if (turno && turno !== 'Ambos') {
@@ -218,7 +218,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
         }
 
         try {
-            setLoading(true);
+            setLocalLoading(true);
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/associados/${cidadeTransporte}/${newTurno}/${id}`,
                 {
@@ -244,7 +244,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             console.error(error);
             toast.error("Não foi possível conectar ao servidor.");
         } finally {
-            setLoading(false);
+            setLocalLoading(false);
         }
     };
 
@@ -253,7 +253,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
         if (!token) return;
 
         try {
-            setLoading(true);
+            setLocalLoading(true);
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/associados/${cidadeTransporte}/${passagemTurno}/${id}`,
                 { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
@@ -261,11 +261,11 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
             if (!res.ok) { toast.error("Erro ao cancelar"); return; }
             toast.success("Passagem cancelada");
             setPassagens(prev => prev.filter(p => p.turno !== passagemTurno));
-        } catch (err) { 
-            console.error(err); 
-            toast.error("Erro de conexão"); 
-        } finally { 
-            setLoading(false); 
+        } catch (err) {
+            console.error(err);
+            toast.error("Erro de conexão");
+        } finally {
+            setLocalLoading(false);
         }
     };
 
@@ -280,7 +280,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
 
         return `${dia}/${mes}/${ano}`;
     }
-    
+
     const getHoje = () => {
         const hoje = new Date();
         const dia = String(hoje.getDate()).padStart(2, '0');
@@ -291,8 +291,8 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
     }
 
     const getBadgeColor = (turno: string) => {
-        return turno === 'Matutino' ? 
-            'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]' : 
+        return turno === 'Matutino' ?
+            'bg-[#FFB400]/10 text-[#FFB400] border-[#FFB400]' :
             'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]';
     };
 
@@ -304,7 +304,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
     return (
         <div className="min-h-screen bg-[#F5F5F5] p-6">
             <div className="max-w-7xl mx-auto space-y-6">
-                
+
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
@@ -316,7 +316,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                             Gerencie suas passagens para o transporte universitário
                         </p>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         <Badge className="bg-[#27AE60]/10 text-[#27AE60] border-[#27AE60]">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -332,7 +332,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                             <BusFront className="w-6 h-6 text-[#0057D9]" />
                             Minhas Passagens Ativas
                         </h2>
-                        
+
                         <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
                             {passagens.map((p, index) => (
                                 <Card key={index} className="border-none shadow-md hover:shadow-lg transition-all">
@@ -357,7 +357,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                             </Badge>
                                         </div>
                                     </CardHeader>
-                                    
+
                                     <CardContent className="space-y-4">
                                         {/* Informações da passagem */}
                                         <div className="grid grid-cols-1 gap-3">
@@ -368,7 +368,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                                     <p className="font-semibold text-[#1F1F1F]">{p.nomeAluno}</p>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                                 <MapPin className="w-5 h-5 text-[#27AE60]" />
                                                 <div>
@@ -397,9 +397,9 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                             variant="destructive"
                                             onClick={() => cancelarPassagem(p.turno)}
                                             className="w-full"
-                                            disabled={loading}
+                                            disabled={localLoading}
                                         >
-                                            {loading ? (
+                                            {localLoading ? (
                                                 <>
                                                     <Spinner size="w-4 h-4" color="border-white" />
                                                     Cancelando...
@@ -434,26 +434,26 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                 </div>
                             </div>
                         </CardHeader>
-                        
+
                         <CardContent className="space-y-6">
                             {/* Informações do usuário */}
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className='space-y-2'>
                                     <Label className="text-sm font-medium text-[#1F1F1F]">Passageiro</Label>
-                                    <Input 
-                                        type='text' 
-                                        value={nome || ''} 
-                                        disabled 
-                                        className="bg-gray-50 border-gray-200" 
+                                    <Input
+                                        type='text'
+                                        value={nome || ''}
+                                        disabled
+                                        className="bg-gray-50 border-gray-200"
                                     />
                                 </div>
                                 <div className='space-y-2'>
                                     <Label className="text-sm font-medium text-[#1F1F1F]">Cidade de Destino</Label>
-                                    <Input 
-                                        type='text' 
-                                        value={cidadeTransporte || ''} 
-                                        disabled 
-                                        className="bg-gray-50 border-gray-200" 
+                                    <Input
+                                        type='text'
+                                        value={cidadeTransporte || ''}
+                                        disabled
+                                        className="bg-gray-50 border-gray-200"
                                     />
                                 </div>
                             </div>
@@ -468,11 +468,11 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                     control={control}
                                     name="turno"
                                     render={({ field }) => (
-                                        <Select 
-                                            value={field.value} 
-                                            onValueChange={(val) => { 
-                                                field.onChange(val); 
-                                                setNewTurno(val) 
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={(val) => {
+                                                field.onChange(val);
+                                                setNewTurno(val)
                                             }}
                                         >
                                             <SelectTrigger className="w-full focus:ring-2 focus:ring-[#0057D9]">
@@ -496,10 +496,10 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                             {/* Configuração de pontos */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <Checkbox 
-                                        id='samePoint' 
-                                        checked={samePoint} 
-                                        onCheckedChange={() => setSamePoint(!samePoint)} 
+                                    <Checkbox
+                                        id='samePoint'
+                                        checked={samePoint}
+                                        onCheckedChange={() => setSamePoint(!samePoint)}
                                     />
                                     <Label htmlFor='samePoint' className="text-sm font-medium text-[#1F1F1F]">
                                         Mesmo ponto para embarque e desembarque
@@ -551,7 +551,7 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                                 <p className="text-red-500 text-sm">{errors.pontoIda.message}</p>
                                             )}
                                         </div>
-                                        
+
                                         <div className="space-y-2">
                                             <Label className="text-sm font-medium text-[#1F1F1F]">
                                                 <Route className="w-4 h-4 inline mr-1" />
@@ -577,12 +577,12 @@ const TravelDashboard: NextPage<Props> = ({ nome, cidadeTransporte, turno, id })
                                 )}
                             </div>
 
-                            <Button 
-                                disabled={loading} 
-                                onClick={handleSubmit(onSubmit)} 
+                            <Button
+                                disabled={localLoading}
+                                onClick={handleSubmit(onSubmit)}
                                 className='w-full bg-[#0057D9] hover:bg-[#0057D9]/90 text-white h-12'
                             >
-                                {loading ? (
+                                {localLoading ? (
                                     <>
                                         <Spinner size="w-4 h-4" color="border-white" />
                                         Gerando Passagem...
