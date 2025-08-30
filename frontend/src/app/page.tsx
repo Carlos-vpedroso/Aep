@@ -440,10 +440,12 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-16 bg-white overflow-hidden">
+      <section className="py-16 bg-white">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+            {/* Texto */}
+            <div className="break-words">
               <h2 className="text-3xl font-bold text-[#0057D9] mb-6">Sobre a Associação</h2>
               <div className="space-y-4 text-gray-600">
                 <p className="text-lg leading-relaxed">
@@ -454,7 +456,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mt-8">
+              <div className="grid grid-cols-2 gap-4 mt-8">
                 <div className="text-center p-4 bg-[#0057D9]/10 rounded-lg">
                   <Target className="w-8 h-8 text-[#0057D9] mx-auto mb-2" />
                   <div className="text-2xl font-bold text-[#0057D9]">98%</div>
@@ -468,8 +470,9 @@ export default function Home() {
               </div>
             </div>
 
-            <Card className="border-none shadow-xl w-full max-w-md mx-auto">
-              <CardContent className="p-6 sm:p-4">
+            {/* Card */}
+            <Card className="border-none shadow-xl w-full max-w-full lg:max-w-md mx-auto">
+              <CardContent className="p-4 sm:p-3">
                 <h3 className="text-xl font-semibold text-[#1F1F1F] mb-6 text-center">Entre em Contato</h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -499,9 +502,11 @@ export default function Home() {
                 </Link>
               </CardContent>
             </Card>
+
           </div>
         </div>
       </section>
+
 
 
       <Footer />
