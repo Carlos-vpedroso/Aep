@@ -167,7 +167,8 @@ const verifyEmail = async (req, res) => {
         associado.confirmationToken = null;
         await associado.save();
 
-        res.send('Cadastro confirmado com sucesso!');
+        // Retorna mensagem de sucesso em JSON
+        res.status(200).json({ message: 'Cadastro confirmado com sucesso!' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
