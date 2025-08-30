@@ -26,7 +26,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, senha }),
+                body: JSON.stringify({ email: email.toLowerCase(), senha }),
             });
 
             const data: { token: string; id: string; email: string; message?: string } = await response.json();
@@ -55,13 +55,13 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const getInformations = async (id: string, token:string): Promise<UserInfo | null> => {
+    const getInformations = async (id: string, token: string): Promise<UserInfo | null> => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token && { "Authorization": `Bearer ${token}` }), 
+                    ...(token && { "Authorization": `Bearer ${token}` }),
                 },
             });
 

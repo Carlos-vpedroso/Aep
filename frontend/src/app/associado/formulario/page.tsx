@@ -67,11 +67,11 @@ const Formulario: NextPage = () => {
         try {
             const body = {
                 nome: values.nome,
-                email: values.email,
+                email: values.email.toLowerCase(),
                 senha: values.senha
             };
 
-            const response = await fetch('http://localhost:5556/api/associados', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
