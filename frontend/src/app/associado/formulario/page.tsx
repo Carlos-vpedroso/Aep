@@ -112,7 +112,7 @@ const Formulario: NextPage = () => {
                     {/* Imagem */}
                     <div className="hidden md:block">
                         <Image
-                            src="/estudante-formulario2.png"
+                            src="/Estudante-formulario2.png"
                             alt="Foto do estudante"
                             priority
                             width={1000}
