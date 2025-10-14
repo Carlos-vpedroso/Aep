@@ -14,26 +14,26 @@ const Associado = {
   telefone: { type: DataTypes.STRING(15) },
   foto: { type: DataTypes.STRING },
   endereco: {
-    type: DataTypes.JSONB, // rua, número, bairro, cidade, cep
+    type: DataTypes.JSON, // rua, número, bairro, cidade, cep
     allowNull: true,
   },
   faculdade: DataTypes.STRING,
   curso: DataTypes.STRING,
-  turno: {
-    type: DataTypes.ENUM("Matutino", "Noturno"),
-    allowNull: false,
-  },
   situacao: {
     type: DataTypes.ENUM("Pendente", "Ativo", "Inativo"),
     defaultValue: "Pendente",
   },
   cidadeTransporte: {
     type: DataTypes.ENUM("Franca", "Passos", "Batatais"),
-    allowNull: false,
+    allowNull: true,
   },
   modalidadeTransporte: {
     type: DataTypes.ENUM("Mensalista", "Diarista"),
-    allowNull: false,
+    allowNull: true,
+  },
+  confirmationToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   validado: { type: DataTypes.BOOLEAN, defaultValue: false },
   firstTime: { type: DataTypes.BOOLEAN, defaultValue: true },

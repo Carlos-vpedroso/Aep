@@ -1,6 +1,7 @@
 require("dotenv").config();
 const app = require("./app");
 const { connect, sequelize } = require("./src/database");
+const initTurnos = require("./src/seeders/initTurnos");
 
 const PORT = process.env.PORT || 3000;
 
@@ -9,6 +10,9 @@ async function startServer() {
     await connect();
     await sequelize.sync({ alter: true });
     console.log("Tabelas sincronizadas com sucesso.");
+
+    // Inicializa os turnos
+    await initTurnos();
 
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
