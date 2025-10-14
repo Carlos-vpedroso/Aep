@@ -1,7 +1,5 @@
 const { Sequelize } = require("sequelize");
-require("dotenv").config();
 
-// Se a variável MYSQL_PUBLIC_URL existir, usa ela; 
 const sequelize = process.env.MYSQL_PUBLIC_URL
   ? new Sequelize(process.env.MYSQL_PUBLIC_URL, {
       dialect: "mysql",
@@ -23,7 +21,7 @@ const sequelize = process.env.MYSQL_PUBLIC_URL
 async function connect() {
   try {
     await sequelize.authenticate();
-    console.log("Conexão com banco de dados bem-sucedida.");
+    console.log("(Conexão com banco de dados bem-sucedida).");
   } catch (error) {
     console.error("Erro ao conectar ao banco:", error);
   }

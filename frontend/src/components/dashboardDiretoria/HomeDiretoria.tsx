@@ -31,7 +31,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
   const { loading } = useAuth();
   const totalAssociadosCadastrados = quantidadesSituacao.Ativo + quantidadesSituacao.Inativo + quantidadesSituacao.Pendente
   const valorMensalidade = 450
-  const valorTotalArrecadado = (quantidadesModalidade.Mensal - (quantidadesSituacao.Pendente + quantidadesSituacao.Inativo)) * valorMensalidade;
+  const valorTotalArrecadado = quantidadesSituacao.Ativo * valorMensalidade;
   const valorFormatado = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",

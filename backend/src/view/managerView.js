@@ -1,130 +1,111 @@
-const { sequelize } = require('../database');
-const associadoModel = require('../model/Associado');
-const diretoriaModel = require('../model/Diretoria');
-const listaBatataisModel = require('../model/ListaBatatais');
-const listaBatataisAlunosModel = require('../model/ListaBatatais_Alunos');
-const listaFrancaMatutinoAlunosModel = require('../model/ListaFrancaMatutino_Alunos');
-const listaFrancaMatutinoModel = require('../model/ListaFrancaMatutino');
-const listaFrancaNoturnoAlunosModel = require('../model/ListaFrancaNoturno_Alunos');
-const listaFrancaNoturnoModel = require('../model/ListaFrancaNoturno');
-const listaPassosMatutinoAlunosModel = require('../model/ListaPassosMatutino_Alunos');
-const listaPassosMatutinoModel = require('../model/ListaPassosMatutino');
-const listaPassosNoturnoAlunosModel = require('../model/ListaPassosNoturno_Alunos');
-const listaPassosNoturnoModel = require('../model/ListaPassosNoturno');
-const motoristaModel = require('../model/Motorista');
+const { sequelize } = require("../database");
+const associadoModel = require("../model/Associado");
+const diretoriaModel = require("../model/Diretoria");
+const listaViagemModel = require("../model/ListaViagem");
+const listaViagemAlunosModel = require("../model/ListaViagemAluno");
+const motoristaModel = require("../model/Motorista");
+const pagamentosModel = require("../model/Pagamentos");
+const rotaModel = require("../model/Rota");
 
-// Definindo as views com tableName
-const AssociadoViewModel = sequelize.define('Associado', associadoModel, {
-  tableName: 'associados',
+//#region Definição das tabelas
+const AssociadoViewModel = sequelize.define("Associado", associadoModel, {
+  tableName: "associados",
   timestamps: true,
 });
 
-const DiretoriaViewModel = sequelize.define('Diretoria', diretoriaModel, {
-  tableName: 'diretores',
+const DiretoriaViewModel = sequelize.define("Diretoria", diretoriaModel, {
+  tableName: "diretores",
   timestamps: true,
 });
 
-const ListaBatataisViewModel = sequelize.define('ListaBatatais', listaBatataisModel, {
-  tableName: 'ListaBatatais',
+const ListaViagemViewModel = sequelize.define("ListaViagem", listaViagemModel, {
+  tableName: "lista_viagem",
   timestamps: true,
 });
 
-const ListaBatataisAlunosViewModel = sequelize.define('ListaAlunosBatatais', listaBatataisAlunosModel, {
-  tableName: 'ListaAlunosBatatais',
+const ListaViagemAlunosViewModel = sequelize.define(
+  "ListaViagemAluno",
+  listaViagemAlunosModel,
+  {
+    tableName: "lista_viagem_alunos",
+    timestamps: true,
+  }
+);
+
+const MotoristaViewModel = sequelize.define("Motorista", motoristaModel, {
+  tableName: "motoristas",
   timestamps: true,
 });
 
-const ListaFrancaMatutinoViewModel = sequelize.define('ListaFrancaMatutino', listaFrancaMatutinoModel, {
-  tableName: 'ListaFrancaMatutino',
+const PagamentosViewModel = sequelize.define("Pagamento", pagamentosModel, {
+  tableName: "pagamentos",
   timestamps: true,
 });
 
-const ListaFrancaMatutinoAlunosViewModel = sequelize.define('ListaAlunosFrancaMatutino', listaFrancaMatutinoAlunosModel, {
-  tableName: 'ListaAlunosFrancaMatutino',
+const RotasViewModel = sequelize.define("Rota", rotaModel, {
+  tableName: "rotas",
   timestamps: true,
 });
+//#endregion
 
-const ListaFrancaNoturnoViewModel = sequelize.define('ListaFrancaNoturno', listaFrancaNoturnoModel, {
-  tableName: 'ListaFrancaNoturno',
-  timestamps: true,
+//#region Relacionamentos das Tabelas
+
+// Rota ↔ ListaViagem
+RotasViewModel.hasMany(ListaViagemViewModel, {
+  foreignKey: "idRota",
+  as: "viagens",
 });
 
-const ListaFrancaNoturnoAlunosViewModel = sequelize.define('ListaAlunosFrancaNoturno', listaFrancaNoturnoAlunosModel, {
-  tableName: 'ListaAlunosFrancaNoturno',
-  timestamps: true,
+ListaViagemViewModel.belongsTo(RotasViewModel, {
+  foreignKey: "idRota",
+  as: "rota",
 });
 
-const ListaPassosMatutinoViewModel = sequelize.define('ListaPassosMatutino', listaPassosMatutinoModel, {
-  tableName: 'ListaPassosMatutino',
-  timestamps: true,
+// Associado ↔ ListaViagem (via ListaViagemAluno)
+AssociadoViewModel.belongsToMany(ListaViagemViewModel, {
+  through: ListaViagemAlunosViewModel,
+  foreignKey: "idAssociado",
+  otherKey: "idLista",
+  as: "viagens",
 });
 
-const ListaPassosMatutinoAlunosViewModel = sequelize.define('ListaAlunosPassosMatutino', listaPassosMatutinoAlunosModel, {
-  tableName: 'ListaAlunosPassosMatutino',
-  timestamps: true,
+ListaViagemViewModel.belongsToMany(AssociadoViewModel, {
+  through: ListaViagemAlunosViewModel,
+  foreignKey: "idLista",
+  otherKey: "idAssociado",
+  as: "alunos",
 });
 
-const ListaPassosNoturnoViewModel = sequelize.define('ListaPassosNoturno', listaPassosNoturnoModel, {
-  tableName: 'ListaPassosNoturno',
-  timestamps: true,
+// ListaViagemAluno ↔ relacionamentos diretos
+ListaViagemAlunosViewModel.belongsTo(AssociadoViewModel, {
+  foreignKey: "idAssociado",
+  as: "associado",
 });
 
-const ListaPassosNoturnoAlunosViewModel = sequelize.define('ListaAlunosPassosNoturno', listaPassosNoturnoAlunosModel, {
-  tableName: 'ListaAlunosPassosNoturno',
-  timestamps: true,
+ListaViagemAlunosViewModel.belongsTo(ListaViagemViewModel, {
+  foreignKey: "idLista",
+  as: "lista",
 });
 
-const MotoristaViewModel = sequelize.define('Motorista', motoristaModel, {
-  tableName: 'motoristas',
-  timestamps: true,
+// Associado ↔ Pagamento
+AssociadoViewModel.hasMany(PagamentosViewModel, {
+  foreignKey: "idAssociado",
+  as: "pagamentos",
 });
 
-// Associado ↔ Listas França
-AssociadoViewModel.hasMany(ListaFrancaMatutinoAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
-ListaFrancaMatutinoAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
+PagamentosViewModel.belongsTo(AssociadoViewModel, {
+  foreignKey: "idAssociado",
+  as: "associado",
+});
 
-ListaFrancaMatutinoViewModel.hasMany(ListaFrancaMatutinoAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
-ListaFrancaMatutinoAlunosViewModel.belongsTo(ListaFrancaMatutinoViewModel, { foreignKey: 'idLista' });
-
-AssociadoViewModel.hasMany(ListaFrancaNoturnoAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
-ListaFrancaNoturnoAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
-
-ListaFrancaNoturnoViewModel.hasMany(ListaFrancaNoturnoAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
-ListaFrancaNoturnoAlunosViewModel.belongsTo(ListaFrancaNoturnoViewModel, { foreignKey: 'idLista' });
-
-// Associado ↔ Listas Passos
-AssociadoViewModel.hasMany(ListaPassosMatutinoAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
-ListaPassosMatutinoAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
-
-ListaPassosMatutinoViewModel.hasMany(ListaPassosMatutinoAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
-ListaPassosMatutinoAlunosViewModel.belongsTo(ListaPassosMatutinoViewModel, { foreignKey: 'idLista' });
-
-AssociadoViewModel.hasMany(ListaPassosNoturnoAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
-ListaPassosNoturnoAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
-
-ListaPassosNoturnoViewModel.hasMany(ListaPassosNoturnoAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
-ListaPassosNoturnoAlunosViewModel.belongsTo(ListaPassosNoturnoViewModel, { foreignKey: 'idLista' });
-
-// Associado ↔ Listas Batatais
-AssociadoViewModel.hasMany(ListaBatataisAlunosViewModel, { foreignKey: 'idAluno', onDelete: 'CASCADE' });
-ListaBatataisAlunosViewModel.belongsTo(AssociadoViewModel, { foreignKey: 'idAluno' });
-
-ListaBatataisViewModel.hasMany(ListaBatataisAlunosViewModel, { foreignKey: 'idLista', onDelete: 'CASCADE' });
-ListaBatataisAlunosViewModel.belongsTo(ListaBatataisViewModel, { foreignKey: 'idLista' });
-
+//#endregion
 
 module.exports = {
   AssociadoViewModel,
   DiretoriaViewModel,
-  ListaBatataisAlunosViewModel,
-  ListaBatataisViewModel,
-  ListaFrancaMatutinoAlunosViewModel,
-  ListaFrancaMatutinoViewModel,
-  ListaFrancaNoturnoAlunosViewModel,
-  ListaFrancaNoturnoViewModel,
-  ListaPassosMatutinoAlunosViewModel,
-  ListaPassosMatutinoViewModel,
-  ListaPassosNoturnoAlunosViewModel,
-  ListaPassosNoturnoViewModel,
+  ListaViagemViewModel,
+  ListaViagemAlunosViewModel,
   MotoristaViewModel,
+  PagamentosViewModel,
+  RotasViewModel,
 };
