@@ -9,6 +9,7 @@ export interface AuthContextType {
 }
 
 export interface UserInfo {
+  id: string; 
   email: string;
   cpf: string | null;
   rg: string | null;
@@ -22,7 +23,7 @@ export interface UserInfo {
   cep: string | null;
   faculdade: string | null;
   curso: string | null;
-  turno: string | null;
+  turno: string[]; 
   cidadeTransporte: string | null;
   modalidadeTransporte: string | null;
   situacao: string;

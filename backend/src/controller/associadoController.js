@@ -146,38 +146,27 @@ const updateFirstTimeAssociado = async (req, res) => {
       { transaction }
     );
 
-    // 🔹 3. Lida com o turno
-    if (data.turno) {
-      let turnosSelecionados = [];
+    // 🔹 3. Atualiza os turnos (agora é um array)
+    if (Array.isArray(data.turno) && data.turno.length > 0) {
+      const turnosSelecionados = await TurnoViewModel.findAll({
+        where: { nome: data.turno },
+        transaction,
+      });
 
-      // Se o front enviou "Ambos", busca os dois turnos
-      if (data.turno === "Ambos") {
-        turnosSelecionados = await TurnoViewModel.findAll({
-          where: { nome: ["Matutino", "Noturno"] },
-          transaction,
-        });
-      } else {
-        // Busca o turno único pelo nome
-        const turnoUnico = await TurnoViewModel.findOne({
-          where: { nome: data.turno },
-          transaction,
-        });
-        if (turnoUnico) turnosSelecionados.push(turnoUnico);
-      }
-
-      // Se não achou nenhum turno válido
       if (turnosSelecionados.length === 0) {
         await transaction.rollback();
-        return res.status(400).json({ message: "Turno inválido" });
+        return res
+          .status(400)
+          .json({ message: "Nenhum turno válido encontrado" });
       }
 
-      // 🔹 Remove vínculos antigos e adiciona os novos
+      // Remove vínculos antigos
       await AssociadoTurnoViewModel.destroy({
         where: { idAssociado: id },
         transaction,
       });
 
-      // Cria vínculos novos
+      // Cria novos vínculos
       for (const turno of turnosSelecionados) {
         await AssociadoTurnoViewModel.create(
           {
@@ -190,102 +179,33 @@ const updateFirstTimeAssociado = async (req, res) => {
       }
     }
 
+    // 🔹 4. Buscar associado atualizado junto com os turnos
+    const associadoAtualizado = await AssociadoViewModel.findByPk(id, {
+      include: [
+        {
+          model: TurnoViewModel,
+          as: "turnos", // certifique-se que o alias da associação seja 'turnos'
+          attributes: ["nome"],
+          through: { attributes: [] }, // para remover dados da tabela de junção
+        },
+      ],
+      transaction,
+    });
+
     await transaction.commit();
 
-    // Remove a senha antes de retornar
-    const { senha, ...associadoSemSenha } = associado.get({ plain: true });
+    const { senha, ...associadoSemSenha } = associadoAtualizado.get({
+      plain: true,
+    });
+
+    // Transformar turnos em array de strings
+    associadoSemSenha.turno = associadoSemSenha.turnos.map((t) => t.nome);
+    delete associadoSemSenha.turnos;
 
     res.status(200).json(associadoSemSenha);
   } catch (error) {
     await transaction.rollback();
     console.error("Erro ao atualizar associado:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-//#endregion
-
-//#region Testar outras Funções
-// GET: listar todos os associados
-const getAllAssociados = async (req, res) => {
-  try {
-    const associados = await AssociadoViewModel.findAll({ raw: true });
-
-    // Remove a senha de cada associado
-    const associadosSemSenha = associados.map(({ senha, ...dados }) => dados);
-
-    res.status(200).json(associadosSemSenha);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// GET: quantidade de associados em todas as cidades
-const getAssociadosQuantidade = async (req, res) => {
-  try {
-    const [franca, passos, batatais] = await Promise.all([
-      AssociadoViewModel.count({ where: { cidadeTransporte: "Franca" } }),
-      AssociadoViewModel.count({ where: { cidadeTransporte: "Passos" } }),
-      AssociadoViewModel.count({ where: { cidadeTransporte: "Batatais" } }),
-    ]);
-    const total = franca + passos + batatais;
-
-    res.status(200).json({
-      Franca: franca,
-      Passos: passos,
-      Batatais: batatais,
-      Total: total,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// GET: quantidade de associados por modalidade
-const getAssociadosPorModalidade = async (req, res) => {
-  try {
-    const [mensal, diaria] = await Promise.all([
-      AssociadoViewModel.count({ where: { modalidadeTransporte: "Mensal" } }),
-      AssociadoViewModel.count({ where: { modalidadeTransporte: "Diaria" } }),
-    ]);
-
-    res.status(200).json({
-      Mensal: mensal,
-      Diaria: diaria,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// GET: quantidade de associados por situação
-const getAssociadosPorSituacao = async (req, res) => {
-  try {
-    const [pendente, ativo, inativo] = await Promise.all([
-      AssociadoViewModel.count({ where: { situacao: "Pendente" } }),
-      AssociadoViewModel.count({ where: { situacao: "Ativo" } }),
-      AssociadoViewModel.count({ where: { situacao: "Inativo" } }),
-    ]);
-
-    res.status(200).json({
-      Pendente: pendente,
-      Ativo: ativo,
-      Inativo: inativo,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// GET: buscar um associado por ID
-const getAssociadoById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const associado = await AssociadoViewModel.findByPk(id);
-    if (!associado) {
-      return res.status(404).json({ message: "Associado não encontrado" });
-    }
-    res.status(200).json(associado);
-  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -311,8 +231,17 @@ const getDadosAssociadoID = async (req, res) => {
     }
 
     // Extrai endereço (se existir)
-    const endereco = associado.endereco || {};
-    const { rua, numero, bairro, cidade, cep } = endereco;
+    let endereco = associado.endereco;
+
+    if (typeof endereco === "string") {
+      try {
+        endereco = JSON.parse(endereco);
+      } catch {
+        endereco = {};
+      }
+    }
+
+    const { rua, numero, bairro, cidade, cep } = endereco || {};
 
     // Extrai nomes dos turnos
     const turnos = associado.turnos?.map((t) => t.nome) || [];
@@ -346,23 +275,204 @@ const getDadosAssociadoID = async (req, res) => {
   }
 };
 
-// PUT: atualizar associado
-const updateAssociado = async (req, res) => {
+// GET: quantidade de associados em todas as cidades
+const getAssociadosQuantidade = async (req, res) => {
+  try {
+    const [franca, passos, batatais] = await Promise.all([
+      AssociadoViewModel.count({ where: { cidadeTransporte: "Franca" } }),
+      AssociadoViewModel.count({ where: { cidadeTransporte: "Passos" } }),
+      AssociadoViewModel.count({ where: { cidadeTransporte: "Batatais" } }),
+    ]);
+    const total = franca + passos + batatais;
+
+    res.status(200).json({
+      Franca: franca,
+      Passos: passos,
+      Batatais: batatais,
+      Total: total,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET: quantidade de associados por modalidade
+const getAssociadosPorModalidade = async (req, res) => {
+  try {
+    const [mensal, diaria] = await Promise.all([
+      AssociadoViewModel.count({
+        where: { modalidadeTransporte: "Mensalista" },
+      }),
+      AssociadoViewModel.count({ where: { modalidadeTransporte: "Diarista" } }),
+    ]);
+
+    res.status(200).json({
+      Mensal: mensal,
+      Diaria: diaria,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET: quantidade de associados por situação
+const getAssociadosPorSituacao = async (req, res) => {
+  try {
+    const [pendente, ativo, inativo] = await Promise.all([
+      AssociadoViewModel.count({ where: { situacao: "Pendente" } }),
+      AssociadoViewModel.count({ where: { situacao: "Ativo" } }),
+      AssociadoViewModel.count({ where: { situacao: "Inativo" } }),
+    ]);
+
+    res.status(200).json({
+      Pendente: pendente,
+      Ativo: ativo,
+      Inativo: inativo,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET: listar todos os associados
+const getAllAssociados = async (req, res) => {
+  try {
+    // Busca todos os associados com os turnos
+    const associados = await AssociadoViewModel.findAll({
+      include: [
+        {
+          model: TurnoViewModel,
+          as: "turnos", // o alias definido na associação belongsToMany
+          attributes: ["nome"],
+        },
+      ],
+    });
+
+    const associadosTratados = associados.map((assoc) => {
+      const { senha, endereco, turnos, ...rest } = assoc.get({ plain: true });
+
+      // Transformar endereço em objeto
+      let enderecoObj = {};
+      try {
+        enderecoObj =
+          typeof endereco === "string" ? JSON.parse(endereco) : endereco;
+      } catch (e) {
+        enderecoObj = {};
+      }
+
+      // Extrair nomes dos turnos
+      const turnosArray = turnos?.map((t) => t.nome) || [];
+
+      return {
+        ...rest,
+        ...enderecoObj,
+        turno: turnosArray,
+      };
+    });
+
+    res.status(200).json(associadosTratados);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+//#endregion
+
+//#region Testar outras Funções
+
+// GET: buscar um associado por ID
+const getAssociadoById = async (req, res) => {
   const { id } = req.params;
   try {
     const associado = await AssociadoViewModel.findByPk(id);
     if (!associado) {
       return res.status(404).json({ message: "Associado não encontrado" });
     }
+    res.status(200).json(associado);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
+// PUT: atualizar associado
+const updateAssociado = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { id } = req.params;
     const data = req.body;
 
-    await associado.update(data);
+    // 1️⃣ Verifica se o associado existe
+    const associado = await AssociadoViewModel.findByPk(id, { transaction });
+    if (!associado) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Associado não encontrado" });
+    }
 
-    const { senha, ...associadoSemSenha } = associado.get({ plain: true });
+    // 2️⃣ Atualiza dados principais do associado (excluindo turno)
+    const { turno, ...dadosPrincipais } = data;
+    await associado.update(dadosPrincipais, { transaction });
+
+    // 3️⃣ Atualiza os turnos, se enviados
+    if (Array.isArray(turno) && turno.length > 0) {
+      const turnosSelecionados = await TurnoViewModel.findAll({
+        where: { nome: turno },
+        transaction,
+      });
+
+      if (turnosSelecionados.length === 0) {
+        await transaction.rollback();
+        return res
+          .status(400)
+          .json({ message: "Nenhum turno válido encontrado" });
+      }
+
+      // Remove vínculos antigos
+      await AssociadoTurnoViewModel.destroy({
+        where: { idAssociado: id },
+        transaction,
+      });
+
+      // Cria novos vínculos
+      for (const t of turnosSelecionados) {
+        await AssociadoTurnoViewModel.create(
+          {
+            id: v4(),
+            idAssociado: id,
+            idTurno: t.id,
+          },
+          { transaction }
+        );
+      }
+    }
+
+    // 4️⃣ Buscar associado atualizado junto com os turnos
+    const associadoAtualizado = await AssociadoViewModel.findByPk(id, {
+      include: [
+        {
+          model: TurnoViewModel,
+          as: "turnos",
+          attributes: ["nome"],
+          through: { attributes: [] },
+        },
+      ],
+      transaction,
+    });
+
+    await transaction.commit();
+
+    const { senha, ...associadoSemSenha } = associadoAtualizado.get({
+      plain: true,
+    });
+
+    // Transformar turnos em array de strings
+    associadoSemSenha.turno = associadoSemSenha.turnos.map((t) => t.nome);
+    delete associadoSemSenha.turnos;
 
     res.status(200).json(associadoSemSenha);
   } catch (error) {
+    await transaction.rollback();
+    console.error("Erro ao atualizar associado:", error);
     res.status(500).json({ error: error.message });
   }
 };

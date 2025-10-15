@@ -2,6 +2,7 @@ require("dotenv").config();
 const app = require("./app");
 const { connect, sequelize } = require("./src/database");
 const initTurnos = require("./src/seeders/initTurnos");
+const initRotas = require("./src/seeders/initRotas");
 
 const PORT = process.env.PORT || 3000;
 
@@ -13,7 +14,7 @@ async function startServer() {
 
     // Inicializa os turnos
     await initTurnos();
-
+    await initRotas();
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
     });

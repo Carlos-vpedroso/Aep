@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { NextPage } from "next";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -21,11 +21,23 @@ import { UserInfo } from "@/types";
 import { toast } from "sonner";
 
 const faculdades = [
-  { sigla: 'UNIFRAN', nome: "Universidade de Franca", cidade: 'Franca' },
-  { sigla: 'FDF', nome: "Faculdade de Direito de Franca", cidade: 'Franca' },
-  { sigla: 'UEMG', nome: "Universidade Estadual de Minas Gerais", cidade: 'Passos' },
-  { sigla: 'IFSul', nome: "Instituto Federal de Educação, Ciência e Tecnologia do Sul de Minas", cidade: 'Passos' },
-  { sigla: 'Claretiano', nome: "Centro Universitário Claretiano", cidade: 'Batatais' }
+  { sigla: "UNIFRAN", nome: "Universidade de Franca", cidade: "Franca" },
+  { sigla: "FDF", nome: "Faculdade de Direito de Franca", cidade: "Franca" },
+  {
+    sigla: "UEMG",
+    nome: "Universidade Estadual de Minas Gerais",
+    cidade: "Passos",
+  },
+  {
+    sigla: "IFSul",
+    nome: "Instituto Federal de Educação, Ciência e Tecnologia do Sul de Minas",
+    cidade: "Passos",
+  },
+  {
+    sigla: "Claretiano",
+    nome: "Centro Universitário Claretiano",
+    cidade: "Batatais",
+  },
 ];
 
 const EditAssociado: NextPage = () => {
@@ -33,6 +45,7 @@ const EditAssociado: NextPage = () => {
   const router = useRouter();
   const { loading, setLoading } = useAuth();
   const [formData, setFormData] = useState<UserInfo>({
+    id: "",
     email: "",
     cpf: "",
     rg: "",
@@ -45,11 +58,11 @@ const EditAssociado: NextPage = () => {
     cep: "",
     faculdade: "",
     curso: "",
-    turno: "",
+    turno: [], // agora é array de string
     cidadeTransporte: "",
     modalidadeTransporte: "",
     situacao: "",
-    firstTime: false
+    firstTime: false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -61,12 +74,15 @@ const EditAssociado: NextPage = () => {
         const token = Cookies.get("token");
         if (!token) return;
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) throw new Error("Erro ao buscar associado");
 
@@ -86,7 +102,7 @@ const EditAssociado: NextPage = () => {
     if (id) fetchAssociado();
   }, [id, setLoading]);
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name: string, value: string | string[]) => {
     if (!formData) return;
     setFormData({ ...formData, [name]: value });
   };
@@ -100,14 +116,17 @@ const EditAssociado: NextPage = () => {
       const token = Cookies.get("token");
       if (!token) return;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/associados/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!res.ok) throw new Error("Erro ao atualizar associado");
 
@@ -131,33 +150,58 @@ const EditAssociado: NextPage = () => {
   return (
     <div className="min-h-screen bg-[var(--color-cinza)] p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-8">
-        <h1 className="text-3xl font-bold text-[var(--color-preto)] mb-6">Editar Associado</h1>
+        <h1 className="text-3xl font-bold text-[var(--color-preto)] mb-6">
+          Editar Associado
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* DADOS PESSOAIS */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[var(--color-azul)]">Dados Pessoais</CardTitle>
+              <CardTitle className="text-[var(--color-azul)]">
+                Dados Pessoais
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Nome</Label>
-                <Input name="nome" value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
+                <Input
+                  name="nome"
+                  value={formData.nome}
+                  onChange={(e) => handleChange("nome", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Email</Label>
-                <Input type="email" name="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
               </div>
               <div>
                 <Label>CPF</Label>
-                <Input name="cpf" value={formData.cpf || ""} onChange={(e) => handleChange("cpf", e.target.value)} />
+                <Input
+                  name="cpf"
+                  value={formData.cpf || ""}
+                  onChange={(e) => handleChange("cpf", e.target.value)}
+                />
               </div>
               <div>
                 <Label>RG</Label>
-                <Input name="rg" value={formData.rg || ""} onChange={(e) => handleChange("rg", e.target.value)} />
+                <Input
+                  name="rg"
+                  value={formData.rg || ""}
+                  onChange={(e) => handleChange("rg", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Telefone</Label>
-                <Input name="telefone" value={formData.telefone || ""} onChange={(e) => handleChange("telefone", e.target.value)} />
+                <Input
+                  name="telefone"
+                  value={formData.telefone || ""}
+                  onChange={(e) => handleChange("telefone", e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -165,28 +209,50 @@ const EditAssociado: NextPage = () => {
           {/* ENDEREÇO */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[var(--color-azul)]">Endereço</CardTitle>
+              <CardTitle className="text-[var(--color-azul)]">
+                Endereço
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Rua</Label>
-                <Input name="rua" value={formData.rua || ""} onChange={(e) => handleChange("rua", e.target.value)} />
+                <Input
+                  name="rua"
+                  value={formData.rua || ""}
+                  onChange={(e) => handleChange("rua", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Número</Label>
-                <Input name="numero" value={formData.numero || ""} onChange={(e) => handleChange("numero", e.target.value)} />
+                <Input
+                  name="numero"
+                  value={formData.numero || ""}
+                  onChange={(e) => handleChange("numero", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Bairro</Label>
-                <Input name="bairro" value={formData.bairro || ""} onChange={(e) => handleChange("bairro", e.target.value)} />
+                <Input
+                  name="bairro"
+                  value={formData.bairro || ""}
+                  onChange={(e) => handleChange("bairro", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Cidade</Label>
-                <Input name="cidade" value={formData.cidade || ""} onChange={(e) => handleChange("cidade", e.target.value)} />
+                <Input
+                  name="cidade"
+                  value={formData.cidade || ""}
+                  onChange={(e) => handleChange("cidade", e.target.value)}
+                />
               </div>
               <div>
                 <Label>CEP</Label>
-                <Input name="cep" value={formData.cep || ""} onChange={(e) => handleChange("cep", e.target.value)} />
+                <Input
+                  name="cep"
+                  value={formData.cep || ""}
+                  onChange={(e) => handleChange("cep", e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -194,7 +260,9 @@ const EditAssociado: NextPage = () => {
           {/* FACULDADE */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[var(--color-azul)]">Faculdade</CardTitle>
+              <CardTitle className="text-[var(--color-azul)]">
+                Faculdade
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -202,13 +270,17 @@ const EditAssociado: NextPage = () => {
                 <Select
                   value={formData.faculdade || ""}
                   onValueChange={(sigla) => {
-                    const faculdadeSelecionada = faculdades.find(f => f.sigla === sigla);
-                    setFormData(prev => {
+                    const faculdadeSelecionada = faculdades.find(
+                      (f) => f.sigla === sigla
+                    );
+                    setFormData((prev) => {
                       if (!prev) return prev; // garante que prev existe
                       return {
                         ...prev,
                         faculdade: sigla,
-                        cidadeTransporte: faculdadeSelecionada ? faculdadeSelecionada.cidade : prev.cidadeTransporte,
+                        cidadeTransporte: faculdadeSelecionada
+                          ? faculdadeSelecionada.cidade
+                          : prev.cidadeTransporte,
                       };
                     });
                   }}
@@ -228,11 +300,28 @@ const EditAssociado: NextPage = () => {
               </div>
               <div>
                 <Label>Curso</Label>
-                <Input name="curso" value={formData.curso || ""} onChange={(e) => handleChange("curso", e.target.value)} />
+                <Input
+                  name="curso"
+                  value={formData.curso || ""}
+                  onChange={(e) => handleChange("curso", e.target.value)}
+                />
               </div>
               <div>
                 <Label>Turno</Label>
-                <Select value={formData.turno || ""} onValueChange={(val) => handleChange("turno", val)}>
+                <Select
+                  value={
+                    formData.turno?.length === 2
+                      ? "Ambos"
+                      : formData.turno?.[0] || ""
+                  }
+                  onValueChange={(valor) => {
+                    if (valor === "Ambos") {
+                      handleChange("turno", ["Matutino", "Noturno"]);
+                    } else {
+                      handleChange("turno", [valor]);
+                    }
+                  }}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -249,7 +338,9 @@ const EditAssociado: NextPage = () => {
           {/* TRANSPORTE */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[var(--color-azul)]">Transporte</CardTitle>
+              <CardTitle className="text-[var(--color-azul)]">
+                Transporte
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -258,19 +349,26 @@ const EditAssociado: NextPage = () => {
                   name="cidadeTransporte"
                   disabled
                   value={formData.cidadeTransporte || ""}
-                  onChange={(e) => handleChange("cidadeTransporte", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("cidadeTransporte", e.target.value)
+                  }
                   className="bg-gray-100 text-gray-500 cursor-not-allowed"
                 />
               </div>
               <div>
                 <Label>Modalidade</Label>
-                <Select value={formData.modalidadeTransporte || ""} onValueChange={(val) => handleChange("modalidadeTransporte", val)}>
+                <Select
+                  value={formData.modalidadeTransporte || ""}
+                  onValueChange={(val) =>
+                    handleChange("modalidadeTransporte", val)
+                  }
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Mensal">Mensal</SelectItem>
-                    <SelectItem value="Diaria">Diária</SelectItem>
+                    <SelectItem value="Mensalista">Mensal</SelectItem>
+                    <SelectItem value="Diarista">Diária</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -280,10 +378,15 @@ const EditAssociado: NextPage = () => {
           {/* SITUAÇÃO */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[var(--color-azul)]">Situação</CardTitle>
+              <CardTitle className="text-[var(--color-azul)]">
+                Situação
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Select value={formData.situacao} onValueChange={(val) => handleChange("situacao", val)}>
+              <Select
+                value={formData.situacao}
+                onValueChange={(val) => handleChange("situacao", val)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
@@ -305,7 +408,10 @@ const EditAssociado: NextPage = () => {
               {saving ? "Salvando..." : "Salvar Alterações"}
             </Button>
             <Link href="/diretoria/dashboard" className="w-full md:w-1/2">
-              <Button variant="outline" className="w-full text-red-500 border-red-500">
+              <Button
+                variant="outline"
+                className="w-full text-red-500 border-red-500"
+              >
                 Voltar
               </Button>
             </Link>

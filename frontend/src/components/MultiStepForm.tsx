@@ -81,9 +81,12 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
   const [ufEmissao, setUfEmissao] = useState<string>("");
   const [validating, setValidating] = useState<boolean>(false);
 
-  const handleChange = useCallback((field: keyof UserInfo, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const handleChange = useCallback(
+    <K extends keyof UserInfo>(field: K, value: UserInfo[K]) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
   useEffect(() => {
     if (rg && ufEmissao) {
@@ -217,8 +220,33 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
       }
 
       const data = await response.json();
+
+      // "Achata" o endereço, parseando caso seja string
+      let endereco: any = {};
+      if (data.endereco) {
+        try {
+          endereco =
+            typeof data.endereco === "string"
+              ? JSON.parse(data.endereco)
+              : data.endereco;
+        } catch (error) {
+          console.error("Erro ao parsear endereço:", error);
+          endereco = {};
+        }
+      }
+
+      const usuarioAtualizado = {
+        ...data,
+        rua: endereco.rua || "",
+        numero: endereco.numero || "",
+        bairro: endereco.bairro || "",
+        cidade: endereco.cidade || "",
+        cep: endereco.cep || "",
+      };
+
+      // Atualiza o estado do usuário já tratado
+      functionSet(usuarioAtualizado);
       toast.success("Cadastro atualizado com sucesso!");
-      functionSet(data);
     } catch (error) {
       toast.error("Erro ao salvar alterações");
       console.error(error);
@@ -454,8 +482,18 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
               Turno
             </Label>
             <Select
-              value={formData.turno || ""}
-              onValueChange={(valor) => handleChange("turno", valor)}
+              value={
+                formData.turno?.length === 2
+                  ? "Ambos"
+                  : formData.turno?.[0] || ""
+              }
+              onValueChange={(valor) => {
+                if (valor === "Ambos") {
+                  handleChange("turno", ["Matutino", "Noturno"]);
+                } else {
+                  handleChange("turno", [valor]);
+                }
+              }}
               required
             >
               <SelectTrigger className="w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
@@ -483,8 +521,8 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
                 <SelectValue placeholder="Selecione seu turno" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Mensal">Mensal</SelectItem>
-                <SelectItem value="Diaria">Diária</SelectItem>
+                <SelectItem value="Mensalista">Mensal</SelectItem>
+                <SelectItem value="Diarista">Diária</SelectItem>
               </SelectContent>
             </Select>
           </div>

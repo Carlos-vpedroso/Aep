@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
-const { TurnoViewModel } = require("../view/managerView"); // ajuste o caminho conforme sua estrutura
+const { TurnoViewModel } = require("../view/managerView"); 
 
 async function initTurnos() {
   try {

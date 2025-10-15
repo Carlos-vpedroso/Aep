@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const authenticateToken = require("../middlewares/authMiddleware");
+const authenticateAdmin = require("../middlewares/adminAuthMiddleware");
 
 //#region
 //#endregion
 
 //#region IMPORT DAS CONTROLLES
 const associadoController = require("../controller/associadoController");
-const controllerAlunosLista = require("../controller/listaCidadeTurnoAlunoController");
 const diretoriaController = require("../controller/diretoriaController");
 // const listaBatataisAlunosController = require('../controller/listaBatataisAlunosController');
 // const listaFrancaMatutinoAlunosController = require('../controller/listaFrancaMatutinoAlunosController');
@@ -60,39 +60,16 @@ router.delete("/associados/:id", associadoController.deleteAssociado);
 //#endregion
 
 //#region ROTAS ALUNO_LISTAS
-// Verificar se aluno está na lista
-router.get(
-  "/associados/:cidade/:turno/:id",
-  authenticateToken,
-  controllerAlunosLista.verificarAlunoNaLista
-);
-
-//Retornar todos os Alunos da Lista
-router.post(
-  "/lista/associados/:cidade/:turno",
-  authenticateToken,
-  controllerAlunosLista.getAllAlunos
-);
-
-// Adicionar aluno à lista
-router.post(
-  "/associados/:cidade/:turno/:id",
-  authenticateToken,
-  controllerAlunosLista.adicionarAlunoLista
-);
-
-// Remover aluno da lista
-router.delete(
-  "/associados/:cidade/:turno/:id",
-  authenticateToken,
-  controllerAlunosLista.removerAlunoLista
-);
 
 //#endregion
 
 //#region ROTAS DIRETORIA
 router.post("/diretoria/login", diretoriaController.loginDiretoria);
-router.post("/diretoria", diretoriaController.createDiretoria);
+router.post(
+  "/diretoria",
+  authenticateAdmin,
+  diretoriaController.createDiretoria
+);
 //#endregion
 
 module.exports = router;
