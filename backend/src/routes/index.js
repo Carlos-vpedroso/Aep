@@ -9,11 +9,7 @@ const authenticateAdmin = require("../middlewares/adminAuthMiddleware");
 //#region IMPORT DAS CONTROLLES
 const associadoController = require("../controller/associadoController");
 const diretoriaController = require("../controller/diretoriaController");
-// const listaBatataisAlunosController = require('../controller/listaBatataisAlunosController');
-// const listaFrancaMatutinoAlunosController = require('../controller/listaFrancaMatutinoAlunosController');
-// const listaFrancaNoturnoAlunosController = require('../controller/listaFrancaNoturnoAlunosController');
-// const listaPassosMatutinoAlunosController = require('../controller/listaPassosMatutinoAlunosController');
-// const listaPassosNoturnoAlunosController = require('../controller/listaPassosNoturnoAlunosController');
+const listaViagemAlunoController = require("../controller/listaViagemAlunoController");
 //#endregion
 
 //#region ROTAS DAS REQUISIÇÕES ASSOCIADO
@@ -60,7 +56,26 @@ router.delete("/associados/:id", associadoController.deleteAssociado);
 //#endregion
 
 //#region ROTAS ALUNO_LISTAS
-
+router.get(
+  "/listas/:cidade/:turno/:data/alunos",
+  authenticateToken,
+  listaViagemAlunoController.getListaViagemAlunosPorRotaData
+);
+router.post(
+  "/listas/adicionar-associado/:idAssociado",
+  authenticateToken,
+  listaViagemAlunoController.adicionarAssociadoNaLista
+);
+router.post(
+  "/listas/visualizar-passagem/:idAssociado",
+  authenticateToken,
+  listaViagemAlunoController.visualizarPassagemAssociado
+);
+router.delete(
+  "/listas/cancelar-passagem/:idPassagem",
+  authenticateToken,
+  listaViagemAlunoController.deletePassagem
+);
 //#endregion
 
 //#region ROTAS DIRETORIA

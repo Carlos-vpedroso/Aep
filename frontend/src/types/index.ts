@@ -9,7 +9,7 @@ export interface AuthContextType {
 }
 
 export interface UserInfo {
-  id: string; 
+  id: string;
   email: string;
   cpf: string | null;
   rg: string | null;
@@ -23,7 +23,7 @@ export interface UserInfo {
   cep: string | null;
   faculdade: string | null;
   curso: string | null;
-  turno: string[]; 
+  turno: string[];
   cidadeTransporte: string | null;
   modalidadeTransporte: string | null;
   situacao: string;
@@ -49,9 +49,15 @@ export interface QuantidadeAssociadosSituacao {
 }
 
 export interface Passagem {
-  nomeAluno: string | null;
-  embarque: string;
-  desembarque: string;
-  turno: string;
-  cidadeTransporte: string | null;
+  idPassagem: string; // UUID da passagem
+  idLista: string; // UUID da lista
+  nomeAluno: string | null; // Nome do passageiro
+  cidadeTransporte: string | null; // Cidade de destino
+  cidade?: string | null; // Opcional, se você quiser manter
+  turno: string; // Matutino / Noturno
+  embarque: string; // Ponto de embarque
+  desembarque: string; // Ponto de desembarque
+  presenca: boolean; // Presença confirmada
+  statusLista: string; // "Aberta", "Fechada", etc.
+  data: string; // Data da passagem
 }
