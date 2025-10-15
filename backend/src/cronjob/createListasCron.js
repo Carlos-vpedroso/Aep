@@ -1,16 +1,8 @@
-const cron = require('node-cron');
-const { criarListaMatutino, criarListaNoturno } = require("../controller/listasController");
+const cron = require("node-cron");
+const { criarListasViagem } = require("../controller/listaViagemController");
 
-// Cron job para listas matutinas: roda todo dia às 23:59 para criar a lista do dia seguinte
-cron.schedule("00 00 * * *", () => {
-    console.log("Executando cron job: criando listas matutinas (para o dia seguinte)...");
-    criarListaMatutino();
+// Executar todo dia à meia-noite
+cron.schedule("59 11 * * *", () => {
+  console.log("Rodando criação automática de listas...");
+  criarListasViagem();
 });
-
-// Cron job para listas noturnas: roda todo dia às 00:01 para criar a lista do dia atual
-cron.schedule("00 00 * * *", () => {
-    console.log("Executando cron job: criando listas noturnas (para o dia atual)...");
-    criarListaNoturno();
-});
-
-console.log("Cron jobs para listas matutinas e noturnas iniciados.");
