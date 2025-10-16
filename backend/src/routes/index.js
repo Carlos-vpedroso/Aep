@@ -10,6 +10,7 @@ const authenticateAdmin = require("../middlewares/adminAuthMiddleware");
 const associadoController = require("../controller/associadoController");
 const diretoriaController = require("../controller/diretoriaController");
 const listaViagemAlunoController = require("../controller/listaViagemAlunoController");
+const pagamentosController = require("../controller/pagamentosController");
 //#endregion
 
 //#region ROTAS DAS REQUISIÇÕES ASSOCIADO
@@ -84,6 +85,14 @@ router.post(
   "/diretoria",
   authenticateAdmin,
   diretoriaController.createDiretoria
+);
+//#endregion
+
+//#region ROTAS PAGAMENTOS
+router.get("/get-token-simulacao", pagamentosController.tokenSimulacao);
+router.post(
+  "/criar/cobranca-pix/diarista",
+  pagamentosController.criarCobrancaPixDiaria
 );
 //#endregion
 
