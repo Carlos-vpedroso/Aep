@@ -42,6 +42,10 @@ const Pagamento = {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
+  metadata: {
+    type: DataTypes.JSON, // ou JSON dependendo do dialect
+    allowNull: true,
+  },
 };
 
 module.exports = Pagamento;

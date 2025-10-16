@@ -91,9 +91,10 @@ router.post(
 //#region ROTAS PAGAMENTOS
 router.get("/get-token-simulacao", pagamentosController.tokenSimulacao);
 router.post(
-  "/criar/cobranca-pix/diarista",
+  "/criar/cobranca-pix/diarista/:idAssociado",
   pagamentosController.criarCobrancaPixDiaria
 );
+router.post("/webhook/pix", pagamentosController.receberWebhookPix);
 //#endregion
 
 module.exports = router;

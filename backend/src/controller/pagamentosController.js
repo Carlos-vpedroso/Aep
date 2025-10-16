@@ -1,6 +1,9 @@
 const https = require("https");
 const fs = require("fs");
 const { VALOR_DIARIA, CHAVE_PIX } = require("../config/constants");
+const { PagamentosViewModel } = require("../view/managerView");
+const gerarQrCodePix = require("../utils/gerarQrCodePix");
+const paymentQueue = require("../queues/paymentQueue");
 
 // Caminho e senha do certificado (do .env)
 const CERT_PATH = process.env.SICOOB_CERT_PATH;
@@ -63,10 +66,12 @@ async function criarCobrancaPixDiaria(req, res) {
     const hojeFormatado = hoje.toLocaleString("pt-BR", {
       timeZone: "America/Sao_Paulo",
     }); // Ex: "16/10/2025 09:30:00"
+
+    const { idAssociado } = req.params;
+    const { nome, cpf, cidade, turno, embarque, desembarque } = req.body;
+
     // Endpoint sandbox oficial seria este:
     const url = "https://sandbox.sicoob.com.br/sicoob/sandbox/pix/api/v2/cob";
-
-    const { nome, cpf, cidade, turno } = req.body;
 
     const body = {
       calendario: { expiracao: 3600 },
@@ -104,12 +109,84 @@ async function criarCobrancaPixDiaria(req, res) {
 
     const data = await response.json();
 
-    console.log("✅ Cobrança PIX criada com sucesso!");
-    return res.status(201).json(data);
+    // gera a imagem QR base64
+    const qrCodeBase64 = await gerarQrCodePix(data.brcode);
+
+    // salva a cobrança no banco
+    const pagamento = await PagamentosViewModel.create({
+      idAssociado,
+      tipo: "Pix",
+      referencia: `Diária-${hojeFormatado}`,
+      valor: data.valor.original,
+      status: "Pendente",
+      txid: data.txid,
+      qr_code: data.brcode,
+      metadata: {
+        cidade,
+        turno,
+        embarque,
+        desembarque,
+      },
+    });
+
+    console.log("✅ Cobrança PIX criada e salva no banco com sucesso!");
+
+    return res.status(201).json({
+      pagamento,
+      qr_code_base64: qrCodeBase64,
+    });
   } catch (err) {
     console.error("❌ Erro ao criar cobrança PIX:", err.message);
     return res.status(500).json({ erro: err.message });
   }
 }
 
-module.exports = { getToken, tokenSimulacao, criarCobrancaPixDiaria };
+async function receberWebhookPix(req, res) {
+  try {
+    const { pix } = req.body;
+
+    if (!pix || pix.length === 0) {
+      return res.status(400).json({ erro: "Nenhum pagamento recebido" });
+    }
+
+    for (const pagamentoPix of pix) {
+      const { txid, valor, horario } = pagamentoPix;
+
+      // Atualiza status do pagamento
+      const [updated] = await PagamentosViewModel.update(
+        { status: "Pago", dataPagamento: new Date(horario) },
+        { where: { txid }, returning: true }
+      );
+
+      if (updated === 0) {
+        console.warn(`Pagamento txid=${txid} não encontrado no banco`);
+        continue; // pula para o próximo pagamento
+      }
+
+      console.log(`Pagamento txid=${txid} atualizado para Pago`);
+
+      // ✅ Adiciona job na fila para processar a emissão da passagem
+      const pagamento = await PagamentosViewModel.findOne({ where: { txid } });
+      const job = await paymentQueue.add("processarPagamento", {
+        pagamentoId: pagamento.id,
+        txid,
+        valor,
+      });
+      console.log("Job adicionado na fila:", job.id);
+    }
+
+    return res
+      .status(200)
+      .json({ mensagem: "Webhook processado e jobs adicionados na fila" });
+  } catch (err) {
+    console.error("Erro ao processar webhook PIX:", err);
+    return res.status(500).json({ erro: err.message });
+  }
+}
+
+module.exports = {
+  getToken,
+  tokenSimulacao,
+  criarCobrancaPixDiaria,
+  receberWebhookPix,
+};
