@@ -8,6 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -38,16 +46,18 @@ import { Button } from "../ui/button";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useAuth } from "@/context";
+import { io, Socket } from "socket.io-client";
 import Spinner from "../Spinner";
 import { toast } from "sonner";
 import { Passagem } from "@/types";
 
 interface Props {
-  nome: string | null;
-  cidadeTransporte: string | null;
+  nome: string;
+  cidadeTransporte: string;
   turno: string[]; // agora é um array
-  id: string | null;
+  id: String;
+  cpf: string;
+  modalidadeTransporte: string;
 }
 
 interface SubmitType {
@@ -61,6 +71,18 @@ interface FormData {
   turno: string;
   pontoIda: string;
   pontoVolta?: string;
+}
+
+interface PagamentoProcessadoPayload {
+  txid: string;
+  valor: string;
+  cidade: string;
+  turno: string;
+  embarque: string;
+  desembarque: string;
+  mensagem: string;
+  lista: any;
+  registro: any;
 }
 
 // ======== LISTAS DE PONTOS ==========
@@ -207,12 +229,20 @@ const TravelDashboard: NextPage<Props> = ({
   cidadeTransporte,
   turno,
   id,
+  cpf,
+  modalidadeTransporte,
 }) => {
   const [newTurno, setNewTurno] = useState("");
   const [samePoint, setSamePoint] = useState(true);
   const [pontos, setPontos] = useState<string[]>([]);
   const [passagens, setPassagens] = useState<Passagem[]>([]);
   const [localLoading, setLocalLoading] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [pixModalData, setPixModalData] = useState<{
+    qrCodeBase64: string;
+    pixCopy: string;
+    valor: string;
+  } | null>(null);
 
   const {
     handleSubmit,
@@ -286,6 +316,64 @@ const TravelDashboard: NextPage<Props> = ({
   }, [cidadeTransporte, turno, id]);
 
   useEffect(() => {
+    const token = Cookies.get("token");
+    if (!token) return;
+
+    // Conecta ao backend via Socket.IO
+    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "", {
+      auth: { token },
+      transports: ["websocket"], // força websocket
+    });
+
+    socket.on("connect", () => {
+      console.log("⚡ Conectado ao Socket.IO:", socket.id);
+
+      // Entra na sala do usuário logado
+      const userId = Cookies.get("userId"); // ou pegue do contexto/estado
+      if (userId) {
+        socket.emit("join", `user_${userId}`);
+      }
+    });
+
+    // Evento enviado pelo worker quando pagamento é processado
+    socket.on("pagamento_processado", (data: PagamentoProcessadoPayload) => {
+      console.log("🚀 Pagamento processado:", data);
+
+      const novaPassagem: Passagem = {
+        idPassagem: data.registro.id,
+        idLista: data.lista.id,
+        nomeAluno: nome, // do seu estado/local
+        cidadeTransporte: data.cidade || cidadeTransporte,
+        turno: data.turno,
+        embarque: data.embarque,
+        desembarque: data.desembarque,
+        presenca: data.registro.presenca,
+        statusLista: "Aberta",
+        data: data.lista.data,
+      };
+
+      // Atualiza estado local
+      setPassagens((prev) => {
+        if (prev.find((p) => p.idPassagem === novaPassagem.idPassagem))
+          return prev;
+        return [...prev, novaPassagem];
+      });
+
+      // Fecha modal Pix
+      setShowPixModal(false);
+      setPixModalData(null);
+
+      // Mostra notificação
+      toast.success(data.mensagem || "Pagamento confirmado!");
+    });
+
+    // Desconecta ao desmontar o componente
+    return () => {
+      socket.disconnect();
+    };
+  }, [id]);
+
+  useEffect(() => {
     if (Array.isArray(turno)) {
       if (turno.length === 1) {
         setNewTurno(turno[0]);
@@ -326,40 +414,83 @@ const TravelDashboard: NextPage<Props> = ({
 
     try {
       setLocalLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/listas/adicionar-associado/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+
+      if (modalidadeTransporte === "Mensalista") {
+        // Lógica atual para mensalista
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/listas/adicionar-associado/${id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          toast.error(errorData?.message || "Erro ao gerar passagem.");
+          return;
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        toast.error(errorData?.message || "Erro ao gerar passagem.");
-        return;
+        const data = await response.json();
+
+        const novaPassagem: Passagem = {
+          idPassagem: data.registro.id,
+          idLista: data.lista.id,
+          nomeAluno: nome,
+          cidadeTransporte: data.lista.cidade,
+          turno: data.lista.turno,
+          embarque: data.registro.embarque,
+          desembarque: data.registro.desembarque,
+          presenca: data.registro.presenca,
+          statusLista: "Aberta",
+          data: data.lista.data,
+        };
+
+        setPassagens((prev) => [...prev, novaPassagem]);
+        toast.success("Passagem gerada com sucesso!");
+      } else if (modalidadeTransporte === "Diarista") {
+        // Cria cobrança Pix
+        const pixResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/criar/cobranca-pix/diarista/${id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              nome,
+              cpf,
+              cidade: cidadeTransporte,
+              turno: newTurno,
+              embarque: formData.pontoIda,
+              desembarque: samePoint
+                ? formData.pontoIda
+                : formData.pontoVolta || formData.pontoIda,
+            }),
+          }
+        );
+
+        if (!pixResponse.ok) {
+          const errorData = await pixResponse.json().catch(() => null);
+          toast.error(errorData?.message || "Erro ao gerar cobrança Pix.");
+          return;
+        }
+
+        const pixData = await pixResponse.json();
+
+        // Exibe modal com QR Code / Pix copia e cola
+        setPixModalData({
+          qrCodeBase64: pixData.qr_code_base64,
+          pixCopy: pixData.pagamento.txid,
+          valor: pixData.pagamento.valor,
+        });
+        setShowPixModal(true);
       }
-      const data = await response.json();
-
-      const novaPassagem: Passagem = {
-        idPassagem: data.registro.id,
-        idLista: data.lista.id,
-        nomeAluno: nome, // você já tem do props/context
-        cidadeTransporte: data.lista.cidade,
-        turno: data.lista.turno,
-        embarque: data.registro.embarque,
-        desembarque: data.registro.desembarque,
-        presenca: data.registro.presenca,
-        statusLista: "Aberta", // ou usar outro campo se houver
-        data: data.lista.data,
-      };
-
-      setPassagens((prev) => [...prev, novaPassagem]);
-      toast.success("Passagem gerada com sucesso!");
     } catch (error: unknown) {
       console.error(error);
       toast.error("Não foi possível conectar ao servidor.");
@@ -783,6 +914,35 @@ const TravelDashboard: NextPage<Props> = ({
             </div>
           </CardContent>
         </Card>
+        <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Pagamento Pix</DialogTitle>
+              <DialogDescription>
+                Siga as instruções abaixo para realizar o pagamento.
+              </DialogDescription>
+            </DialogHeader>
+
+            {pixModalData && (
+              <div className="flex flex-col gap-4 mt-4">
+                <p>Valor: R$ {pixModalData.valor}</p>
+                <img
+                  src={pixModalData.qrCodeBase64}
+                  alt="QR Code Pix"
+                  className="mx-auto"
+                />
+                <div className="flex flex-col">
+                  <p>Código Pix (Copia e Cola):</p>
+                  <Input value={pixModalData.pixCopy} readOnly />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button onClick={() => setShowPixModal(false)}>Fechar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

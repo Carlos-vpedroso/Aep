@@ -1,19 +1,28 @@
-'use client'
-import React from 'react'
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { X, Menu, Home, Ticket, User, Route, FileText, LogOut } from "lucide-react"
-import { useAuth } from "@/context"
-import Cookies from "js-cookie"
-import MultiStepForm from "@/components/MultiStepForm"
-import Image from "next/image"
-import RotasDashboard from '@/components/dashboard/RotasDashboard'
-import HomeDashboard from '@/components/dashboard/HomeDashboard'
-import TravelDashboard from '@/components/dashboard/TravelDashboard'
-import AguardarAprovacao from '@/components/AguardarAprovacao'
-import PaymentDashboard from '@/components/dashboard/PaymentDashboard'
-import ProfileDashboard from '@/components/dashboard/ProfileDashboard'
-import Spinner from '@/components/Spinner'
+"use client";
+import React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  X,
+  Menu,
+  Home,
+  Ticket,
+  User,
+  Route,
+  FileText,
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "@/context";
+import Cookies from "js-cookie";
+import MultiStepForm from "@/components/MultiStepForm";
+import Image from "next/image";
+import RotasDashboard from "@/components/dashboard/RotasDashboard";
+import HomeDashboard from "@/components/dashboard/HomeDashboard";
+import TravelDashboard from "@/components/dashboard/TravelDashboard";
+import AguardarAprovacao from "@/components/AguardarAprovacao";
+import PaymentDashboard from "@/components/dashboard/PaymentDashboard";
+import ProfileDashboard from "@/components/dashboard/ProfileDashboard";
+import Spinner from "@/components/Spinner";
 
 interface Tab {
   label: string;
@@ -23,11 +32,17 @@ interface Tab {
 }
 
 export default function DashboardSidebar() {
-
-  const { getInformations, loading, setLoading, userInfo, setUserInfo, Logout } = useAuth();
-  const [idUser, setIdUser] = useState<string>("")
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('Home')
+  const {
+    getInformations,
+    loading,
+    setLoading,
+    userInfo,
+    setUserInfo,
+    Logout,
+  } = useAuth();
+  const [idUser, setIdUser] = useState<string>("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("Home");
 
   const tabs: Tab[] = [
     { label: "Home", icon: <Home size={20} /> },
@@ -36,7 +51,12 @@ export default function DashboardSidebar() {
     { label: "Pagamentos", icon: <FileText size={20} /> },
     { label: "Perfil", icon: <User size={20} /> },
     // { label: "Configurações", icon: <Settings size={20} /> },
-    { label: "Logout", icon: <LogOut size={20} />, isLogout: true, action: Logout },
+    {
+      label: "Logout",
+      icon: <LogOut size={20} />,
+      isLogout: true,
+      action: Logout,
+    },
   ];
 
   useEffect(() => {
@@ -55,7 +75,6 @@ export default function DashboardSidebar() {
 
         const data = await getInformations(id, token);
         setUserInfo(data);
-
       } catch (err) {
         console.error("Erro ao buscar informações do usuário:", err);
       } finally {
@@ -66,7 +85,6 @@ export default function DashboardSidebar() {
     fetchUserInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // <-- vazio para rodar apenas uma vez
-
 
   if (loading) {
     return (
@@ -79,22 +97,25 @@ export default function DashboardSidebar() {
   if (userInfo?.firstTime) {
     return (
       <section className="flex w-full min-h-screen">
-        <MultiStepForm userInfo={userInfo} id={idUser} functionSet={setUserInfo} />
+        <MultiStepForm
+          userInfo={userInfo}
+          id={idUser}
+          functionSet={setUserInfo}
+        />
       </section>
-    )
+    );
   }
 
-  if (userInfo?.situacao === 'Pendente') {
+  if (userInfo?.situacao === "Pendente") {
     return (
       <section className="flex w-full min-h-screen">
         <AguardarAprovacao />
       </section>
-    )
+    );
   }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-
       {/* Overlay escuro no mobile */}
       {sidebarOpen && (
         <div
@@ -104,9 +125,12 @@ export default function DashboardSidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-20
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}>
-
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-20
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:relative md:translate-x-0`}
+      >
         {/* Cabeçalho mobile */}
         <div className="flex justify-between items-center mb-6 md:hidden">
           <h2 className="text-xl font-bold">Painel</h2>
@@ -123,19 +147,25 @@ export default function DashboardSidebar() {
           {tabs.map((tab) => (
             <Button
               key={tab.label}
-              variant={activeTab === tab.label && !tab.isLogout ? "default" : "ghost"}
+              variant={
+                activeTab === tab.label && !tab.isLogout ? "default" : "ghost"
+              }
               onClick={() => {
                 if (tab.isLogout && tab.action) {
                   tab.action();
-                  setSidebarOpen(false)
+                  setSidebarOpen(false);
                 } else {
                   setActiveTab(tab.label);
-                  setSidebarOpen(false)
+                  setSidebarOpen(false);
                 }
               }}
               className={`justify-start 
                 ${tab.isLogout ? "bg-red-500 text-white hover:bg-red-600" : ""} 
-                ${activeTab === tab.label && !tab.isLogout ? "bg-azul hover:bg-blue-900" : ""}`}
+                ${
+                  activeTab === tab.label && !tab.isLogout
+                    ? "bg-azul hover:bg-blue-900"
+                    : ""
+                }`}
             >
               <div className="flex items-center gap-2">
                 {tab.icon}
@@ -158,7 +188,11 @@ export default function DashboardSidebar() {
             className="object-contain"
             priority
           />
-          <Button variant="default" className="bg-azul" onClick={() => setSidebarOpen(true)}>
+          <Button
+            variant="default"
+            className="bg-azul"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu className="w-6 h-6" />
           </Button>
         </div>
@@ -172,42 +206,46 @@ export default function DashboardSidebar() {
                     <HomeDashboard usuario={userInfo} setTab={setActiveTab} />
                   )}
                 </>
-              )
+              );
             case "Travel":
               return (
                 <>
                   {userInfo && (
-                    <TravelDashboard nome={userInfo.nome} cidadeTransporte={userInfo.cidadeTransporte} id={idUser} turno={userInfo.turno} />
+                    <TravelDashboard
+                      nome={userInfo.nome || ""}
+                      cidadeTransporte={userInfo.cidadeTransporte || ""}
+                      id={idUser}
+                      turno={userInfo.turno || ""}
+                      cpf={userInfo.cpf || ""}
+                      modalidadeTransporte={userInfo.modalidadeTransporte || ""}
+                    />
                   )}
                 </>
-              )
+              );
             case "Rotas":
               return (
                 <>
                   {userInfo && (
-                    <RotasDashboard cidadeTransporte={userInfo.cidadeTransporte} turno={userInfo.turno} />
+                    <RotasDashboard
+                      cidadeTransporte={userInfo.cidadeTransporte}
+                      turno={userInfo.turno}
+                    />
                   )}
                 </>
-              )
+              );
             case "Pagamentos":
               return (
                 <>
                   <PaymentDashboard />
                 </>
-              )
+              );
             case "Perfil":
-              return (
-                <>
-                  {userInfo && (
-                    <ProfileDashboard usuario={userInfo} />
-                  )}
-                </>
-              )
+              return <>{userInfo && <ProfileDashboard usuario={userInfo} />}</>;
             default:
               return <p>Selecione uma aba.</p>;
           }
         })()}
       </main>
     </div>
-  )
+  );
 }

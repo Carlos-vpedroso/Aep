@@ -16,6 +16,23 @@ const CERT_PASSWORD = process.env.SICOOB_CERT_PASSWORD;
 //   rejectUnauthorized: false, // use true em produção!
 // });
 
+function formatCPF(cpf) {
+  // Remove qualquer caractere que não seja número
+  return cpf.replace(/\D/g, "");
+}
+
+// Função auxiliar para extrair metadata corretamente
+function parseMetadata(metadata) {
+  if (typeof metadata === "string") {
+    try {
+      return JSON.parse(metadata);
+    } catch {
+      return {};
+    }
+  }
+  return metadata || {};
+}
+
 // Função para pegar o token do Sicoob
 async function getToken() {
   //const url = "https://sandbox.sicoob.com.br/auth/realms/cooperado/protocol/openid-connect/token";
@@ -44,8 +61,8 @@ async function getToken() {
     }
 
     const data = await response.json();
-    console.log("✅ Token obtido com sucesso!", data.access_token);
-    return data.access_token;
+    console.log("✅ Token obtido com sucesso!", data.accessToken);
+    return data.accessToken;
   } catch (err) {
     console.error("❌ Erro ao obter token Sicoob:", err.message);
     throw err;
@@ -61,21 +78,63 @@ async function tokenSimulacao(req, res) {
 // 🔹 Função para criar cobrança PIX diária
 async function criarCobrancaPixDiaria(req, res) {
   try {
-    const token = await getToken(); // obtém token (fake no sandbox)
+    const token = await getToken();
     const hoje = new Date();
     const hojeFormatado = hoje.toLocaleString("pt-BR", {
       timeZone: "America/Sao_Paulo",
-    }); // Ex: "16/10/2025 09:30:00"
+    });
 
     const { idAssociado } = req.params;
     const { nome, cpf, cidade, turno, embarque, desembarque } = req.body;
+    const newCpf = formatCPF(cpf);
 
-    // Endpoint sandbox oficial seria este:
+    // Primeiro, verifica se já existe uma cobrança válida para o mesmo turno
+    // Busca todos os pagamentos pendentes do associado
+    const pagamentosPendentes = await PagamentosViewModel.findAll({
+      where: {
+        idAssociado,
+        tipo: "Pix",
+        status: "Pendente",
+      },
+    });
+
+    // Função para tratar metadata
+    function parseMetadata(metadata) {
+      if (typeof metadata === "string") {
+        try {
+          return JSON.parse(metadata);
+        } catch {
+          return {};
+        }
+      }
+      return metadata || {};
+    }
+
+    // Verifica se existe algum pagamento pendente com o mesmo turno
+    const pagamentoMesmoTurno = pagamentosPendentes.find((p) => {
+      const meta = parseMetadata(p.metadata);
+      return meta.turno === turno;
+    });
+
+    if (pagamentoMesmoTurno) {
+      const validade = new Date(
+        pagamentoMesmoTurno.createdAt.getTime() + 3600 * 1000
+      );
+      if (new Date() < validade) {
+        return res.status(200).json({
+          pagamento: pagamentoMesmoTurno,
+          qr_code_base64: await gerarQrCodePix(pagamentoMesmoTurno.qr_code),
+          mensagem: "Você já possui uma cobrança PIX válida para este turno",
+        });
+      }
+    }
+
+    // Endpoint sandbox oficial
     const url = "https://sandbox.sicoob.com.br/sicoob/sandbox/pix/api/v2/cob";
 
     const body = {
       calendario: { expiracao: 3600 },
-      devedor: { nome, cpf },
+      devedor: { nome, cpf: newCpf },
       valor: { original: VALOR_DIARIA, modalidadeAlteracao: 0 },
       chave: CHAVE_PIX,
       solicitacaoPagador: `Diária Transporte - ${hojeFormatado}`,
@@ -84,10 +143,7 @@ async function criarCobrancaPixDiaria(req, res) {
           nome: "Trajeto",
           valor: `São Sebastião do Paraíso → ${cidade} - ${turno}`,
         },
-        {
-          nome: "Data",
-          valor: hojeFormatado,
-        },
+        { nome: "Data", valor: hojeFormatado },
       ],
     };
 
@@ -99,7 +155,6 @@ async function criarCobrancaPixDiaria(req, res) {
         client_id: process.env.SICOOB_CLIENT_ID,
       },
       body: JSON.stringify(body),
-      // agent: httpsAgent, // ativa apenas no ambiente real
     });
 
     if (!response.ok) {
@@ -108,11 +163,9 @@ async function criarCobrancaPixDiaria(req, res) {
     }
 
     const data = await response.json();
-
-    // gera a imagem QR base64
     const qrCodeBase64 = await gerarQrCodePix(data.brcode);
 
-    // salva a cobrança no banco
+    // Cria a nova cobrança
     const pagamento = await PagamentosViewModel.create({
       idAssociado,
       tipo: "Pix",
@@ -121,20 +174,12 @@ async function criarCobrancaPixDiaria(req, res) {
       status: "Pendente",
       txid: data.txid,
       qr_code: data.brcode,
-      metadata: {
-        cidade,
-        turno,
-        embarque,
-        desembarque,
-      },
+      metadata: { cidade, turno, embarque, desembarque },
     });
 
     console.log("✅ Cobrança PIX criada e salva no banco com sucesso!");
 
-    return res.status(201).json({
-      pagamento,
-      qr_code_base64: qrCodeBase64,
-    });
+    return res.status(201).json({ pagamento, qr_code_base64: qrCodeBase64 });
   } catch (err) {
     console.error("❌ Erro ao criar cobrança PIX:", err.message);
     return res.status(500).json({ erro: err.message });
@@ -150,7 +195,7 @@ async function receberWebhookPix(req, res) {
     }
 
     for (const pagamentoPix of pix) {
-      const { txid, valor, horario } = pagamentoPix;
+      const { txid, horario } = pagamentoPix;
 
       // Atualiza status do pagamento
       const [updated] = await PagamentosViewModel.update(
@@ -170,7 +215,6 @@ async function receberWebhookPix(req, res) {
       const job = await paymentQueue.add("processarPagamento", {
         pagamentoId: pagamento.id,
         txid,
-        valor,
       });
       console.log("Job adicionado na fila:", job.id);
     }
