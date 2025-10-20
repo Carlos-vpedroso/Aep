@@ -1,5 +1,5 @@
 const { Queue } = require("bullmq");
-const redis = require("../config/redis");
+const redis = require("../redis");
 
 const paymentQueue = new Queue("paymentQueue", {
   connection: redis,

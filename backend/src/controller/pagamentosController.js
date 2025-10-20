@@ -3,7 +3,7 @@ const fs = require("fs");
 const { VALOR_DIARIA, CHAVE_PIX } = require("../config/constants");
 const { PagamentosViewModel } = require("../view/managerView");
 const gerarQrCodePix = require("../utils/gerarQrCodePix");
-const paymentQueue = require("../queues/paymentQueue");
+const paymentQueue = require("../redis/queues/paymentQueue");
 
 // Caminho e senha do certificado (do .env)
 const CERT_PATH = process.env.SICOOB_CERT_PATH;

@@ -1,6 +1,5 @@
 const swaggerJSDoc = require("swagger-jsdoc");
 
-
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -10,7 +9,7 @@ const options = {
       description: "Documentação da API com Swagger",
     },
   },
-  apis: ["../docs/*.js"],
+  apis: ["./src/docs/*.js", "./src/routes/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
