@@ -317,32 +317,42 @@ const TravelDashboard: NextPage<Props> = ({
 
   useEffect(() => {
     const token = Cookies.get("token");
-    if (!token) return;
 
-    // Conecta ao backend via Socket.IO
-    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "", {
-      auth: { token },
-      transports: ["websocket"], // força websocket
-    });
+    if (!token || !id) {
+      console.warn(
+        "⚠️ Token ou userId não encontrado, não será possível conectar ao socket."
+      );
+      return;
+    }
+
+    // 🔌 Conecta ao servidor de WebSocket
+    const socket: Socket = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5556",
+      {
+        auth: { token },
+        transports: ["websocket"], // força uso de websocket puro
+      }
+    );
 
     socket.on("connect", () => {
-      console.log("⚡ Conectado ao Socket.IO:", socket.id);
+      console.log("⚡ Conectado ao servidor WebSocket:", socket.id);
 
-      // Entra na sala do usuário logado
-      const userId = Cookies.get("userId"); // ou pegue do contexto/estado
-      if (userId) {
-        socket.emit("join", `user_${userId}`);
-      }
+      // 🧩 Entra na sala do usuário (cada usuário tem sua própria "room")
+      socket.emit("join", `user_${id}`);
     });
 
-    // Evento enviado pelo worker quando pagamento é processado
+    socket.on("connect_error", (err) => {
+      console.error("❌ Erro de conexão com o socket:", err.message);
+    });
+
+    // 📦 Quando o worker processar o pagamento, o backend emitirá esse evento:
     socket.on("pagamento_processado", (data: PagamentoProcessadoPayload) => {
-      console.log("🚀 Pagamento processado:", data);
+      console.log("📥 Pagamento processado recebido do servidor:", data);
 
       const novaPassagem: Passagem = {
         idPassagem: data.registro.id,
         idLista: data.lista.id,
-        nomeAluno: nome, // do seu estado/local
+        nomeAluno: nome,
         cidadeTransporte: data.cidade || cidadeTransporte,
         turno: data.turno,
         embarque: data.embarque,
@@ -352,26 +362,31 @@ const TravelDashboard: NextPage<Props> = ({
         data: data.lista.data,
       };
 
-      // Atualiza estado local
+      // ✅ Atualiza a lista local sem duplicar
       setPassagens((prev) => {
-        if (prev.find((p) => p.idPassagem === novaPassagem.idPassagem))
+        if (prev.some((p) => p.idPassagem === novaPassagem.idPassagem))
           return prev;
         return [...prev, novaPassagem];
       });
 
-      // Fecha modal Pix
+      // Fecha modal Pix, se estiver aberto
       setShowPixModal(false);
       setPixModalData(null);
 
-      // Mostra notificação
-      toast.success(data.mensagem || "Pagamento confirmado!");
+      // Notificação visual
+      toast.success(data.mensagem || "Pagamento confirmado com sucesso!");
     });
 
-    // Desconecta ao desmontar o componente
+    // 💡 Opcional: trate desconexão
+    socket.on("disconnect", (reason) => {
+      console.warn("⚠️ Desconectado do socket:", reason);
+    });
+
+    // 🔚 Cleanup: desconecta ao desmontar
     return () => {
       socket.disconnect();
     };
-  }, [id]);
+  }, [id, nome, cidadeTransporte]);
 
   useEffect(() => {
     if (Array.isArray(turno)) {
@@ -664,24 +679,26 @@ const TravelDashboard: NextPage<Props> = ({
                       </div>
                     </div>
 
-                    <Button
-                      variant="destructive"
-                      onClick={() => cancelarPassagem(p.idPassagem)}
-                      className="w-full"
-                      disabled={localLoading}
-                    >
-                      {localLoading ? (
-                        <>
-                          <Spinner size="w-4 h-4" color="border-white" />
-                          Cancelando...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Cancelar Passagem
-                        </>
-                      )}
-                    </Button>
+                    {modalidadeTransporte === "Mensalista" && (
+                      <Button
+                        variant="destructive"
+                        onClick={() => cancelarPassagem(p.idPassagem)}
+                        className="w-full"
+                        disabled={localLoading}
+                      >
+                        {localLoading ? (
+                          <>
+                            <Spinner size="w-4 h-4" color="border-white" />
+                            Cancelando...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Cancelar Passagem
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ))}

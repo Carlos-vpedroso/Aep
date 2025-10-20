@@ -10,15 +10,27 @@ function initIo(server) {
   const subClient = pubClient.duplicate();
 
   io = new Server(server, {
-    cors: { origin: "*" }, // ajuste para o seu frontend
+    cors: { origin: "*" }, // ajuste conforme seu frontend
   });
 
   io.adapter(createAdapter(pubClient, subClient));
 
+  // 🔹 Escuta canal Redis para receber mensagens do worker
+  const subscriber = new IORedis(process.env.REDIS_URL);
+  subscriber.subscribe("frontend_notifications");
+  subscriber.on("message", (channel, message) => {
+    try {
+      const { userId, evento, payload } = JSON.parse(message);
+      io.to(`user_${userId}`).emit(evento, payload);
+      console.log(`📢 Evento emitido para user_${userId}: ${evento}`);
+    } catch (err) {
+      console.error("❌ Erro ao processar mensagem Redis:", err);
+    }
+  });
+
   io.on("connection", (socket) => {
     console.log("⚡ Cliente conectado:", socket.id);
 
-    // Para o frontend entrar em salas específicas
     socket.on("join", (room) => {
       socket.join(room);
       console.log(`⚡ Socket ${socket.id} entrou na sala ${room}`);
@@ -32,21 +44,4 @@ function initIo(server) {
   return io;
 }
 
-function getIo() {
-  if (!io)
-    throw new Error(
-      "Socket.io não inicializado. Chame initIo(server) primeiro."
-    );
-  return io;
-}
-
-function notificarFrontend(userId, evento, payload) {
-  try {
-    const ioInstance = getIo();
-    ioInstance.to(`user_${userId}`).emit(evento, payload);
-  } catch (err) {
-    console.error("❌ Erro ao notificar frontend:", err);
-  }
-}
-
-module.exports = { initIo, getIo, notificarFrontend };
+module.exports = { initIo };
