@@ -489,7 +489,7 @@ export default function Home() {
                       <Mail className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-[#1F1F1F]">associacaodosestudantesa.e.p@gmail.com</p>
+                      <p className="font-medium text-[#1F1F1F]">contato@aepssp.com</p>
                       <p className="text-sm text-gray-500">E-mail</p>
                     </div>
                   </div>
