@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "workers": "node src/workers/processPaymentWorker.js"
+    "worker": "node src/workers/processPaymentWorker.js"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
