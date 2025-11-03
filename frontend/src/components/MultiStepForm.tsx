@@ -222,7 +222,13 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
       const data = await response.json();
 
       // "Achata" o endereço, parseando caso seja string
-      let endereco: any = {};
+      let endereco: {
+        rua: string;
+        numero: string;
+        bairro: string;
+        cidade: string;
+        cep: string;
+      } = { rua: "", numero: "", bairro: "", cidade: "", cep: "" };
       if (data.endereco) {
         try {
           endereco =
@@ -231,7 +237,6 @@ export default function MultiStepForm({ userInfo, id, functionSet }: Props) {
               : data.endereco;
         } catch (error) {
           console.error("Erro ao parsear endereço:", error);
-          endereco = {};
         }
       }
 

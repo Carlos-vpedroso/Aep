@@ -50,12 +50,13 @@ import { io, Socket } from "socket.io-client";
 import Spinner from "../Spinner";
 import { toast } from "sonner";
 import { Passagem } from "@/types";
+import Image from "next/image";
 
 interface Props {
   nome: string;
   cidadeTransporte: string;
   turno: string[]; // agora é um array
-  id: String;
+  id: string;
   cpf: string;
   modalidadeTransporte: string;
 }
@@ -81,8 +82,15 @@ interface PagamentoProcessadoPayload {
   embarque: string;
   desembarque: string;
   mensagem: string;
-  lista: any;
-  registro: any;
+  lista: { id: string; cidade: string; turno: string; data: string };
+  registro: {
+    id: string;
+    idLista: string;
+    idAssociado: string;
+    embarque: string;
+    desembarque: string;
+    presenca: boolean;
+  };
 }
 
 // ======== LISTAS DE PONTOS ==========
@@ -296,7 +304,7 @@ const TravelDashboard: NextPage<Props> = ({
           const nomeAssociado = data.associado?.nome || nome; // usa o nome vindo da API ou o prop
 
           // Adiciona o nome do associado em cada passagem
-          const passagensComNome = data.passagens.map((p: any) => ({
+          const passagensComNome = data.passagens.map((p: Passagem) => ({
             ...p,
             nomeAluno: nomeAssociado,
             cidadeTransporte: p.cidade, // também mantém a cidade, caso precise
@@ -313,7 +321,7 @@ const TravelDashboard: NextPage<Props> = ({
     };
 
     fetchPassagens();
-  }, [cidadeTransporte, turno, id]);
+  }, [cidadeTransporte, turno, id, nome]);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -943,10 +951,12 @@ const TravelDashboard: NextPage<Props> = ({
             {pixModalData && (
               <div className="flex flex-col gap-4 mt-4">
                 <p>Valor: R$ {pixModalData.valor}</p>
-                <img
+                <Image
                   src={pixModalData.qrCodeBase64}
                   alt="QR Code Pix"
                   className="mx-auto"
+                  width={200}
+                  height={200}
                 />
                 <div className="flex flex-col">
                   <p>Código Pix (Copia e Cola):</p>
