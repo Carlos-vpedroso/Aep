@@ -15,10 +15,15 @@ const createAssociado = async (req, res) => {
   try {
     const data = req.body;
 
-    // Hash da senha
+    // Validação básica
     if (!data.senha) {
       return res.status(400).json({ error: "Senha é obrigatória" });
     }
+    if (!data.email) {
+      return res.status(400).json({ error: "E-mail é obrigatório" });
+    }
+
+    // Hash da senha
     const salt = await bcrypt.genSalt(10);
     data.senha = await bcrypt.hash(data.senha, salt);
 
@@ -26,17 +31,24 @@ const createAssociado = async (req, res) => {
     const verificationToken = v4();
     data.confirmationToken = verificationToken;
 
+    // Criar o associado no banco
     const newAssociado = await AssociadoViewModel.create(data);
 
-    // Enviar e-mail de confirmação
-    await sendVerificationEmail(data.email, verificationToken);
-
+    // Retorna a resposta **imediatamente**
     res.status(201).json({
       message: "Cadastro criado. Verifique seu e-mail para confirmar.",
       associado: newAssociado,
     });
+
+    // Envia o e-mail em background (não bloqueia a resposta)
+    sendVerificationEmail(data.email, verificationToken).catch((err) => {
+      console.error("Erro ao enviar e-mail de verificação:", err);
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Erro createAssociado:", error);
+    res
+      .status(500)
+      .json({ error: "Erro ao criar associado. Tente novamente." });
   }
 };
 
