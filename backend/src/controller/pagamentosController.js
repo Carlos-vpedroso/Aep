@@ -10,18 +10,17 @@ const CERT_PATH = process.env.SICOOB_CERT_PATH;
 const CERT_PASSWORD = process.env.SICOOB_CERT_PASSWORD;
 
 // Cria o agente HTTPS com o certificado
-// const httpsAgent = new https.Agent({
-//   pfx: fs.readFileSync(CERT_PATH),
-//   passphrase: CERT_PASSWORD,
-//   rejectUnauthorized: false, // use true em produção!
-// });
+const httpsAgent = new https.Agent({
+  pfx: fs.readFileSync(CERT_PATH),
+  passphrase: CERT_PASSWORD,
+});
 
 function formatCPF(cpf) {
   // Remove qualquer caractere que não seja número
   return cpf.replace(/\D/g, "");
 }
 
-// Função auxiliar para extrair metadata corretamente
+// Função para tratar metadata
 function parseMetadata(metadata) {
   if (typeof metadata === "string") {
     try {
@@ -35,24 +34,23 @@ function parseMetadata(metadata) {
 
 // Função para pegar o token do Sicoob
 async function getToken() {
-  //const url = "https://sandbox.sicoob.com.br/auth/realms/cooperado/protocol/openid-connect/token";
-  const url = "http://localhost:5556/api/get-token-simulacao";
+  const url =
+    "https://auth.sicoob.com.br/auth/realms/cooperado/protocol/openid-connect/token";
   // Monta o corpo no formato x-www-form-urlencoded
-  //   const body = new URLSearchParams({
-  //     grant_type: "client_credentials",
-  //     client_id: process.env.SICOOB_CLIENT_ID,
-  //     client_secret: process.env.SICOOB_CLIENT_SECRET,
-  //   });
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: process.env.SICOOB_CLIENT_ID,
+    client_secret: process.env.SICOOB_CLIENT_SECRET,
+  });
 
   try {
     const response = await fetch(url, {
-      //   method: "POST",
-      method: "GET",
-      //   body,
-      //   headers: {
-      //     "Content-Type": "application/x-www-form-urlencoded",
-      //   },
-      //   agent: httpsAgent, // importante: inclui o certificado
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+      agent: httpsAgent, // importante: inclui o certificado
     });
 
     if (!response.ok) {
@@ -67,12 +65,6 @@ async function getToken() {
     console.error("❌ Erro ao obter token Sicoob:", err.message);
     throw err;
   }
-}
-
-async function tokenSimulacao(req, res) {
-  const newToken = "1301865f-c6bc-38f3-9f49-666dbcfc59c3"; //essa string é o accessToken do Sandbox apenas para teste.
-  const data = { accessToken: newToken };
-  return res.status(200).json(data);
 }
 
 // 🔹 Função para criar cobrança PIX diária
@@ -98,18 +90,6 @@ async function criarCobrancaPixDiaria(req, res) {
       },
     });
 
-    // Função para tratar metadata
-    function parseMetadata(metadata) {
-      if (typeof metadata === "string") {
-        try {
-          return JSON.parse(metadata);
-        } catch {
-          return {};
-        }
-      }
-      return metadata || {};
-    }
-
     // Verifica se existe algum pagamento pendente com o mesmo turno
     const pagamentoMesmoTurno = pagamentosPendentes.find((p) => {
       const meta = parseMetadata(p.metadata);
@@ -129,8 +109,8 @@ async function criarCobrancaPixDiaria(req, res) {
       }
     }
 
-    // Endpoint sandbox oficial
-    const url = "https://sandbox.sicoob.com.br/sicoob/sandbox/pix/api/v2/cob";
+    // Endpoint oficial
+    const url = "https://api.sicoob.com.br/pix/api/v2/cob";
 
     const body = {
       calendario: { expiracao: 3600 },
@@ -230,7 +210,6 @@ async function receberWebhookPix(req, res) {
 
 module.exports = {
   getToken,
-  tokenSimulacao,
   criarCobrancaPixDiaria,
   receberWebhookPix,
 };
