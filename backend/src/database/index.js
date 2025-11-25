@@ -3,7 +3,7 @@ const { Sequelize } = require("sequelize");
 const sequelize = process.env.MYSQL_PUBLIC_URL
   ? new Sequelize(process.env.MYSQL_PUBLIC_URL, {
       dialect: "mysql",
-      // logging: console.log,
+      logging: false,
     })
   : new Sequelize(
       process.env.DB_NAME,
@@ -13,7 +13,7 @@ const sequelize = process.env.MYSQL_PUBLIC_URL
         host: process.env.DB_HOST,
         dialect: process.env.DB_DIALECT,
         port: process.env.DB_PORT || 3306,
-        // logging: console.log,
+        logging: false,
       }
     );
 

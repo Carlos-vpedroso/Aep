@@ -1,18 +1,26 @@
+const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
+const path = require("path");
 const { VALOR_DIARIA, CHAVE_PIX } = require("../config/constants");
 const { PagamentosViewModel } = require("../view/managerView");
 const gerarQrCodePix = require("../utils/gerarQrCodePix");
 const paymentQueue = require("../redis/queues/paymentQueue");
 
-// Caminho e senha do certificado (do .env)
-const CERT_PATH = process.env.SICOOB_CERT_PATH;
-const CERT_PASSWORD = process.env.SICOOB_CERT_PASSWORD;
+const pfxPath = path.join(__dirname, "sicoob.pfx");
 
-// Cria o agente HTTPS com o certificado
+// Gera o arquivo PFX a partir do Base64 do .env
+fs.writeFileSync(
+  pfxPath,
+  Buffer.from(process.env.SICOOB_CERT_BASE64.replace(/\n/g, ""), "base64")
+);
+
+// Cria o agente HTTPS usando o buffer direto
 const httpsAgent = new https.Agent({
-  pfx: fs.readFileSync(CERT_PATH),
-  passphrase: CERT_PASSWORD,
+  pfx: fs.readFileSync(pfxPath),
+  passphrase: process.env.SICOOB_CERT_PASSWORD,
+  minVersion: "TLSv1.2",
+  maxVersion: "TLSv1.3",
 });
 
 function formatCPF(cpf) {
@@ -40,27 +48,22 @@ async function getToken() {
   const body = new URLSearchParams({
     grant_type: "client_credentials",
     client_id: process.env.SICOOB_CLIENT_ID,
-    client_secret: process.env.SICOOB_CLIENT_SECRET,
+    scope:
+      "pix.read cobv.read lotecobv.write payloadlocation.read webhook.write cob.read cob.write webhook.read pix.write lotecobv.read payloadlocation.write cobv.write",
   });
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
+    const response = await axios.post(url, body.toString(), {
+      httpsAgent,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body,
-      agent: httpsAgent, // importante: inclui o certificado
     });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Erro na autenticação: ${error}`);
+    if (!response.data || !response.data.access_token) {
+      throw new Error("Token não retornado pelo Sicoob");
     }
 
-    const data = await response.json();
-    console.log("✅ Token obtido com sucesso!", data.accessToken);
-    return data.accessToken;
+    return response.data.access_token;
   } catch (err) {
     console.error("❌ Erro ao obter token Sicoob:", err.message);
     throw err;
@@ -127,25 +130,20 @@ async function criarCobrancaPixDiaria(req, res) {
       ],
     };
 
-    const response = await fetch(url, {
-      method: "POST",
+    const response = await axios.post(url, body, {
+      httpsAgent,
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
         client_id: process.env.SICOOB_CLIENT_ID,
       },
-      body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Erro ao criar cobrança PIX: ${error}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     const qrCodeBase64 = await gerarQrCodePix(data.brcode);
 
-    // Cria a nova cobrança
+    // Salva no banco
     const pagamento = await PagamentosViewModel.create({
       idAssociado,
       tipo: "Pix",
@@ -157,11 +155,19 @@ async function criarCobrancaPixDiaria(req, res) {
       metadata: { cidade, turno, embarque, desembarque },
     });
 
-    console.log("✅ Cobrança PIX criada e salva no banco com sucesso!");
+    console.log("✅ Cobrança PIX criada e salva no banco com sucesso!!");
 
     return res.status(201).json({ pagamento, qr_code_base64: qrCodeBase64 });
   } catch (err) {
-    console.error("❌ Erro ao criar cobrança PIX:", err.message);
+    if (err.response) {
+      console.error(
+        "❌ Erro na API Sicoob:",
+        err.response.status,
+        err.response.data
+      );
+    } else {
+      console.error("❌ Erro ao criar cobrança PIX:", err.message);
+    }
     return res.status(500).json({ erro: err.message });
   }
 }

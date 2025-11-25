@@ -16,12 +16,12 @@ const AssociadoViewModel = sequelize.define("Associado", associadoModel, {
 });
 
 const DiretoriaViewModel = sequelize.define("Diretoria", diretoriaModel, {
-  tableName: "diretores",
+  tableName: "diretorias",
   timestamps: true,
 });
 
 const ListaViagemViewModel = sequelize.define("ListaViagem", listaViagemModel, {
-  tableName: "lista_viagem",
+  tableName: "lista_viagens",
   timestamps: true,
 });
 
@@ -58,7 +58,7 @@ const AssociadoTurnoViewModel = sequelize.define(
   "AssociadoTurno",
   associadoTurnoModel,
   {
-    tableName: "associados_turnos",
+    tableName: "associado_turnos",
     timestamps: true,
   }
 );

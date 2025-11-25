@@ -41,6 +41,8 @@ import {
   ArrowRight,
   Navigation,
   Ticket,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { useForm, Controller } from "react-hook-form";
@@ -251,6 +253,7 @@ const TravelDashboard: NextPage<Props> = ({
     pixCopy: string;
     valor: string;
   } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const {
     handleSubmit,
@@ -509,7 +512,7 @@ const TravelDashboard: NextPage<Props> = ({
         // Exibe modal com QR Code / Pix copia e cola
         setPixModalData({
           qrCodeBase64: pixData.qr_code_base64,
-          pixCopy: pixData.pagamento.txid,
+          pixCopy: pixData.pagamento.qr_code,
           valor: pixData.pagamento.valor,
         });
         setShowPixModal(true);
@@ -949,8 +952,10 @@ const TravelDashboard: NextPage<Props> = ({
             </DialogHeader>
 
             {pixModalData && (
-              <div className="flex flex-col gap-4 mt-4">
-                <p>Valor: R$ {pixModalData.valor}</p>
+              <div className="flex flex-col gap-4 my-4">
+                <p className="font-semibold text-lg">
+                  Valor: R$ {pixModalData.valor}
+                </p>
                 <Image
                   src={pixModalData.qrCodeBase64}
                   alt="QR Code Pix"
@@ -960,7 +965,28 @@ const TravelDashboard: NextPage<Props> = ({
                 />
                 <div className="flex flex-col">
                   <p>Código Pix (Copia e Cola):</p>
-                  <Input value={pixModalData.pixCopy} readOnly />
+                  <div className="flex gap-4">
+                    <Input value={pixModalData.pixCopy} disabled />
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(
+                            pixModalData.pixCopy
+                          );
+                          setCopied(true);
+
+                          // feedback some rápido
+                          setTimeout(() => setCopied(false), 3000);
+                        } catch (error) {
+                          console.error("Erro ao copiar:", error);
+                        }
+                      }}
+                    >
+                      {copied ? <Check className="text-green-600" /> : <Copy />}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

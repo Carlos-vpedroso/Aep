@@ -11,8 +11,6 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await connect();
-    await sequelize.sync({ alter: true });
-    console.log("Tabelas sincronizadas com sucesso.");
 
     // Inicializa os turnos
     await initTurnos();
