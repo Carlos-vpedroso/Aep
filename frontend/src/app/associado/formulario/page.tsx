@@ -302,14 +302,18 @@ const Formulario: NextPage = () => {
                         <FormLabel className="text-sm font-normal">
                           Li e aceito os{" "}
                           <Link
-                            href="/termos"
+                            href="/termos.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             Termos de Uso
                           </Link>
                           e a{" "}
                           <Link
-                            href="/termos"
+                            href="/politica.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             Política de Privacidade
