@@ -134,16 +134,23 @@ const ListasDiretoria: NextPage = () => {
   const exportarDados = () => {
     if (filteredDados.length === 0) return;
 
+    const titulo = `Lista - ${filtros.cidade} | ${filtros.turno} | ${filtros.data}\n`;
+
     // Monta o texto a ser copiado
-    const texto = filteredDados
-      .map((item, idx) => `${idx + 1}\t${item.nome}`)
+    const alunosTexto = filteredDados
+      .map(
+        (item, idx) =>
+          `${idx + 1}\t${item.nome} - ${item.embarque || "Sem embarque"}`
+      )
       .join("\n");
+
+    const textoFinal = `${titulo}\n${alunosTexto}`;
 
     // Copia para o clipboard
     navigator.clipboard
-      .writeText(texto)
+      .writeText(textoFinal)
       .then(() => {
-        toast.success("Nº e Nome copiados com sucesso!");
+        toast.success("Nº, Nome, Embarque e Título copiados com sucesso!");
       })
       .catch(() => {
         toast.error("Erro ao copiar os dados");
