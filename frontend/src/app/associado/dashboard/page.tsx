@@ -183,8 +183,8 @@ export default function DashboardSidebar() {
           <Image
             src="/LogoAEP-transparente2.png"
             alt="A.E.P. Logo"
-            height={24}
-            width={24}
+            height={50}
+            width={50}
             className="object-contain"
             priority
           />

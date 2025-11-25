@@ -22,23 +22,23 @@ function initIo(server) {
     try {
       const { userId, evento, payload } = JSON.parse(message);
       io.to(`user_${userId}`).emit(evento, payload);
-      console.log(`📢 Evento emitido para user_${userId}: ${evento}`);
+      // console.log(`📢 Evento emitido para user_${userId}: ${evento}`);
     } catch (err) {
       console.error("❌ Erro ao processar mensagem Redis:", err);
     }
   });
 
   io.on("connection", (socket) => {
-    console.log("⚡ Cliente conectado:", socket.id);
+    // console.log("⚡ Cliente conectado:", socket.id);
 
     socket.on("join", (room) => {
       socket.join(room);
-      console.log(`⚡ Socket ${socket.id} entrou na sala ${room}`);
+      // console.log(`⚡ Socket ${socket.id} entrou na sala ${room}`);
     });
 
-    socket.on("disconnect", () => {
-      console.log("⚡ Cliente desconectado:", socket.id);
-    });
+    // socket.on("disconnect", () => {
+    //   console.log("⚡ Cliente desconectado:", socket.id);
+    // });
   });
 
   return io;
