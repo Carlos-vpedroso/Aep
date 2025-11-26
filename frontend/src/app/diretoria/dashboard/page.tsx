@@ -19,6 +19,7 @@ import {
   QuantidadeAssociadosCidade,
   QuantidadeAssociadosModalidade,
   QuantidadeAssociadosSituacao,
+  Faturamento,
 } from "@/types";
 import ListasDiretoria from "@/components/dashboardDiretoria/ListasDiretoria";
 import AssociadosDiretoria from "@/components/dashboardDiretoria/AssociadosDiretoria";
@@ -41,6 +42,7 @@ const DasboardSideBar: NextPage = () => {
     useState<QuantidadeAssociadosModalidade | null>(null);
   const [quantidadePorSituacao, setQuantidadePorSituacao] =
     useState<QuantidadeAssociadosSituacao | null>(null);
+  const [faturamento, setFaturamento] = useState<Faturamento[] | null>(null);
 
   const tabs: Tab[] = [
     { label: "Home", icon: <Home size={20} /> },
@@ -69,36 +71,43 @@ const DasboardSideBar: NextPage = () => {
         };
 
         // Executa as 3 requisições em paralelo
-        const [resCidades, resModalidade, resSituacao] = await Promise.all([
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/cidade`,
-            { headers }
-          ),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/modalidade`,
-            { headers }
-          ),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/situacao`,
-            { headers }
-          ),
-        ]);
+        const [resCidades, resModalidade, resSituacao, resFaturamento] =
+          await Promise.all([
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/cidade`,
+              { headers }
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/modalidade`,
+              { headers }
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/associados/quantidade/situacao`,
+              { headers }
+            ),
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/faturamento`, {
+              headers,
+            }),
+          ]);
 
         if (!resCidades.ok || !resModalidade.ok || !resSituacao.ok) {
           throw new Error("Erro em uma das requisições");
         }
 
         // Converte todas as respostas em JSON ao mesmo tempo
-        const [dataCidades, dataModalidade, dataSituacao] = await Promise.all([
-          resCidades.json(),
-          resModalidade.json(),
-          resSituacao.json(),
-        ]);
+        const [dataCidades, dataModalidade, dataSituacao, dataFaturamento] =
+          await Promise.all([
+            resCidades.json(),
+            resModalidade.json(),
+            resSituacao.json(),
+            resFaturamento.json(),
+          ]);
 
         // Atualiza os states
         setQuantidadePorCidade(dataCidades);
         setQuantidadePorModalidade(dataModalidade);
         setQuantidadePorSituacao(dataSituacao);
+        setFaturamento(dataFaturamento);
       } catch (error) {
         console.error("Erro no fetchDados:", error);
       } finally {
@@ -205,12 +214,15 @@ const DasboardSideBar: NextPage = () => {
             case "Home":
               return (
                 <>
-                  {quantidadePorModalidade && quantidadePorSituacao && (
-                    <HomeDiretoria
-                      quantidadesModalidade={quantidadePorModalidade}
-                      quantidadesSituacao={quantidadePorSituacao}
-                    />
-                  )}
+                  {quantidadePorModalidade &&
+                    quantidadePorSituacao &&
+                    faturamento && (
+                      <HomeDiretoria
+                        quantidadesModalidade={quantidadePorModalidade}
+                        quantidadesSituacao={quantidadePorSituacao}
+                        faturamento={faturamento}
+                      />
+                    )}
                 </>
               );
             case "Listas":

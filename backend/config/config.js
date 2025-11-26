@@ -14,3 +14,5 @@ module.exports = {
     dialect: "mysql",
   },
 };
+// para subir a atualização das migrations para o banco em produção
+// npx sequelize-cli db:migrate --env production

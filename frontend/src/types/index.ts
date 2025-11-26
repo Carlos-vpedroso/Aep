@@ -61,3 +61,10 @@ export interface Passagem {
   statusLista: string; // "Aberta", "Fechada", etc.
   data: string; // Data da passagem
 }
+
+export interface Faturamento {
+  mes: string;
+  ano: number;
+  quantidadeAssinantes: number;
+  valor: number;
+}

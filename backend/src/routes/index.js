@@ -43,6 +43,11 @@ router.get(
 router.get("/associados/verify/:token", associadoController.verifyEmail);
 router.post("/associados", associadoController.createAssociado);
 router.post("/associados/login", associadoController.loginAssociado);
+router.post("/associados/forgot-password", associadoController.forgotPassword);
+router.put(
+  "/associados/reset-password/:token",
+  associadoController.resetPassword
+);
 router.put(
   "/associados/:id",
   authenticateToken,
@@ -85,6 +90,11 @@ router.post(
   "/diretoria",
   authenticateAdmin,
   diretoriaController.createDiretoria
+);
+router.get(
+  "/faturamento",
+  authenticateToken,
+  diretoriaController.faturamentoDashboard
 );
 //#endregion
 

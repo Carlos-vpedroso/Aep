@@ -1,8 +1,14 @@
-import { NextPage } from 'next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Button } from '@/components/ui/button'
+import { NextPage } from "next";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   User,
@@ -15,82 +21,108 @@ import {
   Clock,
   CheckCircle2,
   PieChart,
-} from 'lucide-react'
-import { QuantidadeAssociadosModalidade, QuantidadeAssociadosSituacao } from '@/types'
-import { useAuth } from '@/context'
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
-import Autoplay from "embla-carousel-autoplay"
-import Spinner from '../Spinner'
+} from "lucide-react";
+import {
+  Faturamento,
+  QuantidadeAssociadosModalidade,
+  QuantidadeAssociadosSituacao,
+} from "@/types";
+import { useAuth } from "@/context";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import Spinner from "../Spinner";
+import FaturamentoMensalChart from "../FaturamentoMensalChart";
 
 interface Props {
   quantidadesModalidade: QuantidadeAssociadosModalidade;
   quantidadesSituacao: QuantidadeAssociadosSituacao;
+  faturamento: Faturamento[];
 }
 
-const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSituacao }: Props) => {
+const HomeDiretoria: NextPage<Props> = ({
+  quantidadesModalidade,
+  quantidadesSituacao,
+  faturamento,
+}: Props) => {
   const { loading } = useAuth();
-  const totalAssociadosCadastrados = quantidadesSituacao.Ativo + quantidadesSituacao.Inativo + quantidadesSituacao.Pendente
-  const valorMensalidade = 450
-  const valorTotalArrecadado = quantidadesSituacao.Ativo * valorMensalidade;
+  const totalAssociadosCadastrados =
+    quantidadesSituacao.Ativo +
+    quantidadesSituacao.Inativo +
+    quantidadesSituacao.Pendente;
+  const valorMensalidade = 450;
+  const valorTotalArrecadado = quantidadesModalidade.Mensal * valorMensalidade;
   const valorFormatado = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(valorTotalArrecadado);
-
+  const dadosFaturamento = faturamento.map((item) => ({
+    mes: item.mes.toUpperCase(), // opcional: deixar mais bonito (JAN, FEV…)
+    valor: item.valor,
+  }));
 
   const kpiData = [
     {
       title: "Receita Total - Mensalistas",
       value: valorFormatado,
       icon: DollarSign,
-      color: "text-[#27AE60]"
+      color: "text-[#27AE60]",
     },
     {
       title: "Mensalistas",
       value: quantidadesModalidade.Mensal,
       icon: Users,
-      color: "text-[#0057D9]"
+      color: "text-[#0057D9]",
     },
     {
       title: "Diaristas",
       value: quantidadesModalidade.Diaria,
       icon: User,
-      color: "text-[#FFB400]"
+      color: "text-[#FFB400]",
     },
     {
       title: "Informações Do Cadastro",
       icon: Activity,
       color: "text-[#7C3AED]",
-      carouselItems: [{
-        title: 'Associados Pendentes',
-        value: quantidadesSituacao.Pendente
-      }, {
-        title: 'Associados Ativos',
-        value: quantidadesSituacao.Ativo
-      }, {
-        title: 'Associados Inativos',
-        value: quantidadesSituacao.Inativo
-      }, {
-        title: 'Total de Usuários Cadastrados',
-        value: totalAssociadosCadastrados
-      }]
-    }
-  ]
+      carouselItems: [
+        {
+          title: "Associados Pendentes",
+          value: quantidadesSituacao.Pendente,
+        },
+        {
+          title: "Associados Ativos",
+          value: quantidadesSituacao.Ativo,
+        },
+        {
+          title: "Associados Inativos",
+          value: quantidadesSituacao.Inativo,
+        },
+        {
+          title: "Total de Usuários Cadastrados",
+          value: totalAssociadosCadastrados,
+        },
+      ],
+    },
+  ];
 
   const recentActivities = [
-    { action: "Novo usuário cadastrado", time: "2 min atrás", status: "success" },
+    {
+      action: "Novo usuário cadastrado",
+      time: "2 min atrás",
+      status: "success",
+    },
     { action: "Pagamento processado", time: "5 min atrás", status: "success" },
     { action: "Sistema atualizado", time: "1h atrás", status: "info" },
     { action: "Backup realizado", time: "2h atrás", status: "success" },
-    { action: "Erro no servidor corrigido", time: "4h atrás", status: "warning" }
-  ]
-
-  const projectStatus = [
-    { name: "Dashboard Analytics", progress: 87, status: "Em andamento", color: "bg-[#0057D9]" },
-    { name: "API Integration", progress: 100, status: "Concluído", color: "bg-[#27AE60]" },
-    { name: "Mobile App", progress: 45, status: "Em andamento", color: "bg-[#FFB400]" },
-    { name: "Security Updates", progress: 23, status: "Iniciado", color: "bg-[#7C3AED]" }
-  ]
+    {
+      action: "Erro no servidor corrigido",
+      time: "4h atrás",
+      status: "warning",
+    },
+  ];
 
   // 🔹 Se loading estiver true, renderiza apenas o Spinner centralizado
   if (loading) {
@@ -101,18 +133,22 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
     );
   }
 
-
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F1F1F]">Dashboard Diretoria</h1>
+            <h1 className="text-3xl font-bold text-[#1F1F1F]">
+              Dashboard Diretoria
+            </h1>
             <p className="text-gray-600 mt-1">Panorama geral da aplicação</p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-[#27AE60] border-[#27AE60]">
+            <Badge
+              variant="outline"
+              className="text-[#27AE60] border-[#27AE60]"
+            >
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Sistema Online
             </Badge>
@@ -130,7 +166,10 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
 
             if (isLast && kpi.carouselItems) {
               return (
-                <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow p-4 select-none">
+                <Card
+                  key={index}
+                  className="border-none shadow-md hover:shadow-lg transition-shadow p-4 select-none"
+                >
                   <CardContent className="p-0 flex items-center gap-4">
                     {/* Ícone à esquerda */}
                     <div className="p-2 rounded-lg bg-gray-100 flex-shrink-0">
@@ -138,7 +177,8 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
                     </div>
                     {/* Carousel à direita */}
                     <div className="flex-1 overflow-hidden">
-                      <Carousel className="w-full"
+                      <Carousel
+                        className="w-full"
                         opts={{
                           align: "start",
                           loop: true,
@@ -155,8 +195,12 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
                               key={idx}
                               className="flex flex-col items-start justify-center h-32 p-4 bg-white rounded-md"
                             >
-                              <p className="text-sm text-gray-600">{item.title}</p>
-                              <p className="text-2xl font-bold text-[#1F1F1F]">{item.value}</p>
+                              <p className="text-sm text-gray-600">
+                                {item.title}
+                              </p>
+                              <p className="text-2xl font-bold text-[#1F1F1F]">
+                                {item.value}
+                              </p>
                             </CarouselItem>
                           ))}
                         </CarouselContent>
@@ -168,7 +212,10 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
             }
 
             return (
-              <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="border-none shadow-md hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -177,7 +224,9 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">{kpi.title}</p>
-                        <p className="text-2xl font-bold text-[#1F1F1F]">{kpi.value}</p>
+                        <p className="text-2xl font-bold text-[#1F1F1F]">
+                          {kpi.value}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -187,30 +236,35 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
           })}
         </div>
 
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico Principal */}
           <Card className="lg:col-span-2 border-none shadow-md">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-[#1F1F1F]">Performance Mensal</CardTitle>
-                  <CardDescription>Análise comparativa dos últimos 6 meses</CardDescription>
+                  <CardTitle className="text-[#1F1F1F]">
+                    Performance Mensal
+                  </CardTitle>
+                  <CardDescription>
+                    Análise comparativa dos últimos 6 meses
+                  </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="border-[#0057D9] text-[#0057D9] hover:bg-[#0057D9]/10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-[#0057D9] text-[#0057D9] hover:bg-[#0057D9]/10"
+                >
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Ver Detalhes
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-64 bg-gradient-to-br from-[#0057D9]/5 to-[#7C3AED]/5 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
-                <div className="text-center">
-                  <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Gráfico será renderizado aqui</p>
-                  <p className="text-xs text-gray-400 mt-1">Integração com biblioteca de gráficos futuramente.</p>
+              <CardContent>
+                <div className="h-64 rounded-lg border border-gray-100 p-2">
+                  <FaturamentoMensalChart data={dadosFaturamento} />
                 </div>
-              </div>
+              </CardContent>
             </CardContent>
           </Card>
 
@@ -225,12 +279,23 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
             <CardContent>
               <div className="space-y-4">
                 {recentActivities.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === 'success' ? 'bg-[#27AE60]' :
-                      activity.status === 'warning' ? 'bg-[#FFB400]' : 'bg-[#0057D9]'
-                      }`} />
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.status === "success"
+                          ? "bg-[#27AE60]"
+                          : activity.status === "warning"
+                          ? "bg-[#FFB400]"
+                          : "bg-[#0057D9]"
+                      }`}
+                    />
                     <div className="flex-1">
-                      <p className="text-sm text-[#1F1F1F] font-medium">{activity.action}</p>
+                      <p className="text-sm text-[#1F1F1F] font-medium">
+                        {activity.action}
+                      </p>
                       <p className="text-xs text-gray-500">{activity.time}</p>
                     </div>
                   </div>
@@ -239,41 +304,6 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
             </CardContent>
           </Card>
         </div>
-
-        {/* Status dos Projetos */}
-        <Card className="border-none shadow-md">
-          <CardHeader>
-            <CardTitle className="text-[#1F1F1F]">Status dos Projetos</CardTitle>
-            <CardDescription>Acompanhamento do progresso dos principais projetos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projectStatus.map((project, index) => (
-                <div key={index} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-[#1F1F1F]">{project.name}</h4>
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs ${project.status === 'Concluído' ? 'bg-[#27AE60]/10 text-[#27AE60]' :
-                        project.status === 'Em andamento' ? 'bg-[#0057D9]/10 text-[#0057D9]' :
-                          'bg-[#FFB400]/10 text-[#FFB400]'
-                        }`}
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Progresso</span>
-                      <span className="font-medium text-[#1F1F1F]">{project.progress}%</span>
-                    </div>
-                    <Progress value={project.progress} className="h-2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Footer com Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -318,7 +348,7 @@ const HomeDiretoria: NextPage<Props> = ({ quantidadesModalidade, quantidadesSitu
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HomeDiretoria
+export default HomeDiretoria;

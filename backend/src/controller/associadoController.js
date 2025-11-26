@@ -5,9 +5,13 @@ const {
 } = require("../view/managerView.js");
 const { sequelize } = require("../database/index.js");
 const bcrypt = require("bcryptjs");
-const sendVerificationEmail = require("../services/emailService.js");
+const {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} = require("../services/emailService.js");
 const { v4 } = require("uuid");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 
 //#region Tudo certo !
 // POST: criar novo associado
@@ -41,9 +45,7 @@ const createAssociado = async (req, res) => {
     });
 
     // Envia o e-mail em background (não bloqueia a resposta)
-    sendVerificationEmail(data.email, verificationToken).catch((err) => {
-      console.error("Erro ao enviar e-mail de verificação:", err);
-    });
+    sendVerificationEmail(data.email, verificationToken).catch(console.error);
   } catch (error) {
     console.error("Erro createAssociado:", error);
     res
@@ -122,6 +124,87 @@ const loginAssociado = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+//POST: Esqueceu a senha?
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1. Validar email
+    if (!email) {
+      return res.status(400).json({ message: "Email é obrigatório" });
+    }
+
+    // 2. Verificar se email existe
+    const associado = await AssociadoViewModel.findOne({ where: { email } });
+    if (!associado) {
+      // Segurança: não revelar se existe ou não
+      return res.status(200).json({
+        message:
+          "Se o email existir, enviaremos instruções para resetar a senha.",
+      });
+    }
+
+    // 3. Gerar token JWT com expiração de 1h
+    const resetToken = jwt.sign({ id: associado.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // 4. Salvar token + expiração no banco
+    associado.forgotToken = resetToken;
+    associado.forgotTokenExpires = Date.now() + 3600000; // 1h
+    await associado.save();
+
+    // 5. Enviar email
+    sendResetPasswordEmail(email, resetToken).catch(console.error);
+
+    return res.status(200).json({
+      message:
+        "Se o email existir, enviaremos instruções para redefinir sua senha.",
+    });
+  } catch (error) {
+    console.error("Erro forgotPassword:", error);
+    res.status(500).json({ error: "Erro ao solicitar redefinição de senha" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { novaSenha } = req.body;
+
+    if (!novaSenha) {
+      return res.status(400).json({ message: "A nova senha é obrigatória" });
+    }
+
+    // 1. Procurar o token no banco
+    const associado = await AssociadoViewModel.findOne({
+      where: {
+        forgotToken: token,
+        forgotTokenExpires: { [Op.gt]: Date.now() }, // ainda válido
+      },
+    });
+
+    if (!associado) {
+      return res.status(400).json({ message: "Token inválido ou expirado" });
+    }
+
+    // 2. Hash da nova senha
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(novaSenha, salt);
+
+    associado.senha = senhaHash;
+    associado.forgotToken = null;
+    associado.forgotTokenExpires = null;
+
+    await associado.save();
+
+    res.status(200).json({ message: "Senha redefinida com sucesso!" });
+  } catch (error) {
+    console.error("Erro resetPassword:", error);
+    res.status(500).json({ error: "Erro ao redefinir senha" });
   }
 };
 
@@ -512,6 +595,8 @@ module.exports = {
   createAssociado,
   verifyEmail,
   loginAssociado,
+  forgotPassword,
+  resetPassword,
   updateFirstTimeAssociado,
   updateAssociado,
   deleteAssociado,

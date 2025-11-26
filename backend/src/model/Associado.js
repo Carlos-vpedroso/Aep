@@ -37,6 +37,10 @@ const Associado = {
   },
   validado: { type: DataTypes.BOOLEAN, defaultValue: false },
   firstTime: { type: DataTypes.BOOLEAN, defaultValue: true },
+
+  // 🚀 Campos para recuperação de senha
+  forgotToken: { type: DataTypes.STRING, allowNull: true },
+  forgotTokenExpires: { type: DataTypes.DATE, allowNull: true },
 };
 
 module.exports = Associado;
