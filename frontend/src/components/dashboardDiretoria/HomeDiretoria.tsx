@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
   Users,
@@ -20,7 +19,6 @@ import {
   Target,
   Clock,
   CheckCircle2,
-  PieChart,
 } from "lucide-react";
 import {
   Faturamento,

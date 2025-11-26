@@ -81,6 +81,7 @@ export default function ResetPasswordPage() {
         setSuccess(true);
       }
     } catch (error) {
+      console.log(error)
       setStatus("❌ Erro");
       setMensagem("Erro ao conectar com o servidor.");
     }

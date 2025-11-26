@@ -259,6 +259,7 @@ export default function LoginPage() {
                   setModalForgot(false);
                   forgotForm.reset();
                 } catch (err) {
+                  console.log(err)
                   toast.error(
                     "Erro ao enviar email. Verifique o email informado."
                   );

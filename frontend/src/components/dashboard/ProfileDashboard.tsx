@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { UserInfo } from "@/types";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogTitle,
@@ -142,7 +141,7 @@ export default function ProfileDashboard({ usuario }: Props) {
       setUserInfo(usuarioFormatado);
       toast.success("Perfil atualizado com sucesso!");
       setModalPerfil(false);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao enviar os dados.");
     } finally {
       setLoading(false);
