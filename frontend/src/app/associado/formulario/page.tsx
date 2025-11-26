@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import Spinner from "@/components/Spinner";
-import { Eye, EyeOff } from "lucide-react";
+import { CheckCircle, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context";
 import Link from "next/link";
 
@@ -53,6 +53,7 @@ const Formulario: NextPage = () => {
   const { loading, setLoading } = useAuth();
   const [showSenha, setShowSenha] = useState(false);
   const [showConfirmSenha, setShowConfirmSenha] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -103,6 +104,7 @@ const Formulario: NextPage = () => {
         description:
           "Por favor, acesse seu e-mail para confirmar seu cadastro.",
       });
+      setFinished(true);
 
       form.reset(); // limpa os campos
     } catch (error: unknown) {
@@ -134,139 +136,132 @@ const Formulario: NextPage = () => {
           </div>
 
           {/* Formulário */}
-          <div className="p-6 flex flex-col justify-center">
-            <h1 className="text-2xl font-bold text-azul mb-4">
-              Cadastro de Associado
-            </h1>
-            <p className="text-gray-600 mb-6">
-              Preencha os dados abaixo para solicitar seu cadastro na
-              associação.
-            </p>
+          {finished ? (
+            <div className="p-10 flex flex-col items-center text-center">
+              <CheckCircle className="text-green-600 w-20 h-20 mb-4" />
 
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => {
-                    return (
+              <h1 className="text-3xl font-bold text-green-700 mb-2">
+                Cadastro enviado com sucesso!
+              </h1>
+
+              <p className="text-gray-600 max-w-md mb-4">
+                Enviamos um link de verificação para o seu e-mail. Confirme sua
+                conta para acessar o <br />
+                <strong>Dashboard do Associado</strong>.
+              </p>
+
+              <p className="text-sm text-gray-500 mb-8">
+                Caso o e-mail não chegue em alguns minutos, verifique a caixa de
+                spam.
+              </p>
+
+              <Link href="https://mail.google.com" target="_blank">
+                <Button className="bg-azul hover:bg-blue-800 text-white cursor-pointer">
+                  Abrir meu e-mail
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="p-6 flex flex-col justify-center">
+              <h1 className="text-2xl font-bold text-azul mb-4">
+                Cadastro de Associado
+              </h1>
+              <p className="text-gray-600 mb-6">
+                Preencha os dados abaixo para solicitar seu cadastro na
+                associação.
+              </p>
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Nome Completo</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Digite seu nome"
+                              {...field}
+                              className={`${
+                                isFieldValid("nome")
+                                  ? "border-green-500 focus:border-green-500"
+                                  : ""
+                              }`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>E-mail</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="seuemail@email.com"
+                              {...field}
+                              className={`${
+                                isFieldValid("email")
+                                  ? "border-green-500 focus:border-green-500"
+                                  : ""
+                              }`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirmEmail"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Confirme o E-mail</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Confirme seu email"
+                              {...field}
+                              className={`${
+                                isFieldValid("confirmEmail")
+                                  ? "border-green-500 focus:border-green-500"
+                                  : ""
+                              }`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="senha"
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome Completo</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Digite seu nome"
-                            {...field}
-                            className={`${
-                              isFieldValid("nome")
-                                ? "border-green-500 focus:border-green-500"
-                                : ""
-                            }`}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>E-mail</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="seuemail@email.com"
-                            {...field}
-                            className={`${
-                              isFieldValid("email")
-                                ? "border-green-500 focus:border-green-500"
-                                : ""
-                            }`}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="confirmEmail"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Confirme o E-mail</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Confirme seu email"
-                            {...field}
-                            className={`${
-                              isFieldValid("confirmEmail")
-                                ? "border-green-500 focus:border-green-500"
-                                : ""
-                            }`}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="senha"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type={showSenha ? "text" : "password"}
-                            {...field}
-                            placeholder="********"
-                            className={`${
-                              isFieldValid("senha")
-                                ? "border-green-500 focus:border-green-500"
-                                : ""
-                            }`}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setShowSenha(!showSenha)}
-                          >
-                            {showSenha ? <Eye /> : <EyeOff />}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="confirmSenha"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Confirme a Senha</FormLabel>
+                        <FormLabel>Senha</FormLabel>
                         <FormControl>
                           <div className="flex items-center gap-2">
                             <Input
-                              type={showConfirmSenha ? "text" : "password"}
+                              type={showSenha ? "text" : "password"}
                               {...field}
                               placeholder="********"
                               className={`${
-                                isFieldValid("confirmSenha")
+                                isFieldValid("senha")
                                   ? "border-green-500 focus:border-green-500"
                                   : ""
                               }`}
@@ -274,68 +269,102 @@ const Formulario: NextPage = () => {
                             <Button
                               type="button"
                               variant="ghost"
-                              onClick={() =>
-                                setShowConfirmSenha(!showConfirmSenha)
-                              }
+                              onClick={() => setShowSenha(!showSenha)}
                             >
-                              {showConfirmSenha ? <Eye /> : <EyeOff />}
+                              {showSenha ? <Eye /> : <EyeOff />}
                             </Button>
                           </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    );
-                  }}
-                />
-                <FormField
-                  control={form.control}
-                  name="termos"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(value) => field.onChange(!!value)}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-normal">
-                          Li e aceito os{" "}
-                          <Link
-                            href="/termos.pdf"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            Termos de Uso
-                          </Link>
-                          e a{" "}
-                          <Link
-                            href="/politica.pdf"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            Política de Privacidade
-                          </Link>
-                        </FormLabel>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                    )}
+                  />
 
-                <Button
-                  disabled={loading ? true : false}
-                  type="submit"
-                  className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2"
-                >
-                  {loading && <Spinner />}
-                  {loading ? "Processando..." : "Enviar Cadastro"}
-                </Button>
-              </form>
-            </Form>
-          </div>
+                  <FormField
+                    control={form.control}
+                    name="confirmSenha"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Confirme a Senha</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type={showConfirmSenha ? "text" : "password"}
+                                {...field}
+                                placeholder="********"
+                                className={`${
+                                  isFieldValid("confirmSenha")
+                                    ? "border-green-500 focus:border-green-500"
+                                    : ""
+                                }`}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() =>
+                                  setShowConfirmSenha(!showConfirmSenha)
+                                }
+                              >
+                                {showConfirmSenha ? <Eye /> : <EyeOff />}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="termos"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={(value) => field.onChange(!!value)}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm font-normal">
+                            Li e aceito os{" "}
+                            <Link
+                              href="/termos.pdf"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Termos de Uso
+                            </Link>
+                            e a{" "}
+                            <Link
+                              href="/politica.pdf"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Política de Privacidade
+                            </Link>
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    disabled={loading ? true : false}
+                    type="submit"
+                    className="w-full bg-azul hover:bg-blue-800 flex items-center justify-center gap-2"
+                  >
+                    {loading && <Spinner />}
+                    {loading ? "Processando..." : "Enviar Cadastro"}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          )}
         </div>
       </section>
     </>

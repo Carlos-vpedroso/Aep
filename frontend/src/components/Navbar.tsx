@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -16,15 +16,19 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Início', href: '/' },
-    { name: 'Diretoria', href: '/login' },
-    { name: 'Motorista', href: '/login' },
+    { name: "Início", href: "/" },
+    { name: "Diretoria", href: "/login" },
+    { name: "Motorista", href: "/login" },
   ];
 
   const associadoLinks = [
-    { name: 'Login', href: '/login', icon: <LogIn className="w-4 h-4" /> },
-    { name: 'Inscrição', href: '/associado/cadastro', icon: <User className="w-4 h-4" /> },
-    { name: 'Benefícios', href: '/associado/beneficios' },
+    { name: "Login", href: "/login", icon: <LogIn className="w-4 h-4" /> },
+    {
+      name: "Inscrição",
+      href: "/associado/cadastro",
+      icon: <User className="w-4 h-4" />,
+    },
+    { name: "Benefícios", href: "/associado/beneficios" },
   ];
 
   return (
@@ -56,12 +60,17 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-azul text-white hover:bg-blue-950 hover:text-white text-sm font-medium flex items-center gap-1">
+              <Button
+                variant="outline"
+                className="bg-azul text-white 
+                hover:bg-blue-950 hover:text-white text-sm font-medium 
+                flex items-center gap-1 cursor-pointer"
+              >
                 Associado <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {associadoLinks.map(link => (
+              {associadoLinks.map((link) => (
                 <DropdownMenuItem key={link.href} asChild>
                   <Link href={link.href} className="flex items-center gap-2">
                     {link.icon} {link.name}
@@ -74,11 +83,12 @@ export default function Navbar() {
 
         {/* Mobile Hamburger */}
         <div className="md:hidden">
-          <Button
-            variant="ghost"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <Button variant="ghost" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </Button>
         </div>
       </div>
@@ -99,12 +109,15 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full flex justify-between items-center bg-azul text-white hover:bg-blue-950 hover:text-white text-base font-medium">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center bg-azul text-white hover:bg-blue-950 hover:text-white text-base font-medium"
+              >
                 Associado <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {associadoLinks.map(link => (
+              {associadoLinks.map((link) => (
                 <DropdownMenuItem key={link.href} asChild>
                   <Link
                     href={link.href}

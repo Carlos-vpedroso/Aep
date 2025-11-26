@@ -134,7 +134,25 @@ const ListasDiretoria: NextPage = () => {
   const exportarDados = () => {
     if (filteredDados.length === 0) return;
 
-    const titulo = `Lista - ${filtros.cidade} | ${filtros.turno} | ${filtros.data}\n`;
+    const formatarDataBR = (data: string | Date) => {
+      let d: Date;
+
+      if (data instanceof Date) {
+        d = data;
+      } else {
+        const [ano, mes, dia] = data.split("-");
+        d = new Date(Number(ano), Number(mes) - 1, Number(dia));
+      }
+
+      const diaF = String(d.getDate()).padStart(2, "0");
+      const mesF = String(d.getMonth() + 1).padStart(2, "0");
+      const anoF = d.getFullYear();
+
+      return `${diaF}/${mesF}/${anoF}`;
+    };
+    const dataFormatada = formatarDataBR(filtros.data);
+
+    const titulo = `Lista - ${filtros.cidade} | ${filtros.turno} | ${dataFormatada}\n`;
 
     // Monta o texto a ser copiado
     const alunosTexto = filteredDados

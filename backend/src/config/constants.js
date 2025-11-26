@@ -1,5 +1,5 @@
 module.exports = {
-  VALOR_DIARIA: "0.01",
+  VALOR_DIARIA: "50.00",
   CHAVE_PIX: "45354091000100",
   MENSALIDADE: "450",
 };

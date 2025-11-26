@@ -35,7 +35,6 @@ import {
   Users,
   MapPin,
   Clock,
-  Eye,
   Edit,
   Trash2,
   CreditCard,
@@ -712,18 +711,7 @@ const AssociadosDiretoria: NextPage<Props> = ({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-8 w-8 p-0 hover:bg-[#0057D9]/10 hover:text-[#0057D9]"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </Link>
-                              <Link
-                                href={`/diretoria/dashboard/editAssociado/${item.id}`}
-                              >
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 hover:bg-[#FFB400]/10 hover:text-[#FFB400]"
+                                  className="h-8 w-8 p-0 hover:bg-[#FFB400]/10 hover:text-[#FFB400] cursor-pointer"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -731,7 +719,7 @@ const AssociadosDiretoria: NextPage<Props> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-600"
+                                className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-600 cursor-pointer"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
