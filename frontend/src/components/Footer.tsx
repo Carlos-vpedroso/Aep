@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 import {
   FaFacebook,
   FaInstagram,
@@ -6,6 +6,7 @@ import {
   FaEnvelope,
 } from "react-icons/fa";
 import Link from "next/link";
+import Image from "next/image";
 
 const Footer: React.FC = () => {
   return (
@@ -104,9 +105,20 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Barra inferior */}
-      <div className="bg-blue-900 text-center py-4 text-sm text-gray-300">
-        © {new Date().getFullYear()} A.E.P. - Todos os direitos reservados.
-        Criado e desenvolvido por Carlos Pedroso.
+      <div className="bg-blue-900 py-4 text-sm text-gray-300">
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 justify-between max-w-7xl mx-auto">
+          <div>
+            © {new Date().getFullYear()} A.E.P. - Todos os direitos reservados.
+          </div>
+          <Link href="https://www.teczed.com.br">
+            <Image
+              src="/TecZed_Triangle+TECZED.svg"
+              alt="TecZed Solutions"
+              width={48}
+              height={48}
+            />
+          </Link>
+        </div>
       </div>
     </footer>
   );

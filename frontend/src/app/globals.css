@@ -1,16 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-azul: #0057D9;
-  --color-cinza: #F5F5F5;
-  --color-amarelo: #FFB400;
-  --color-preto: #1F1F1F;
-  --color-verde: #27AE60;
-  --color-roxo: #7C3AED;
+  --color-azul: #0057d9;
+  --color-cinza: #f5f5f5;
+  --color-amarelo: #ffb400;
+  --color-preto: #1f1f1f;
+  --color-verde: #27ae60;
+  --color-roxo: #7c3aed;
 }
 
 @theme inline {
@@ -52,8 +51,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
-
-
 
 body {
   background: var(--color-cinza);
